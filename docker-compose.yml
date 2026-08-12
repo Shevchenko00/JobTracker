@@ -1,0 +1,37 @@
+services:
+  jobs_backend:
+    build: ./backend
+    container_name: jobs_backend
+    restart: unless-stopped
+    ports:
+      - "9212:9212"
+    volumes:
+      - ./backend:/usr/src/app
+      - ./media:/usr/src/app/media
+    networks:
+      - jobs_network
+    command: >
+      bash -c "python manage.py migrate &&
+               python manage.py runserver 0.0.0.0:9212"
+
+  jobs_frontend:
+    build: ./fe
+    container_name: jobs_frontend
+    restart: unless-stopped
+    ports:
+      - "5172:5172"
+    volumes:
+      - ./fe:/usr/src/app
+      - /usr/src/app/node_modules
+      - /usr/src/app/.next
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - jobs_backend
+    networks:
+      - jobs_network
+
+
+networks:
+  jobs_network:
+    external: true
