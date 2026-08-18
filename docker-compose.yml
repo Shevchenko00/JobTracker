@@ -1,32 +1,73 @@
 services:
+
   jobs_backend:
     build: ./backend
     container_name: jobs_backend
     restart: unless-stopped
+
     ports:
       - "9212:9212"
+
     volumes:
       - ./backend:/usr/src/app
       - ./media:/usr/src/app/media
+
+    environment:
+      POSTGRES_HOST: jobs_postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: jobs
+      POSTGRES_USER: jobs
+      POSTGRES_PASSWORD: jobs_password
+
+    depends_on:
+      - jobs_postgres
+
     networks:
       - jobs_network
+
     command: >
       bash -c "python manage.py migrate &&
                python manage.py runserver 0.0.0.0:9212"
+
 
   jobs_frontend:
     build: ./fe
     container_name: jobs_frontend
     restart: unless-stopped
+
     ports:
       - "5172:5172"
+
     volumes:
       - ./fe:/usr/src/app
       - /usr/src/app/node_modules
+
     extra_hosts:
       - "host.docker.internal:host-gateway"
+
     depends_on:
       - jobs_backend
+
+    networks:
+      - jobs_network
+
+
+  jobs_postgres:
+    image: postgres:17
+    container_name: jobs_postgres
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_DB: jobs
+      POSTGRES_USER: jobs
+      POSTGRES_PASSWORD: jobs_password
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+    ports:
+      - "5432:5432"
+
     networks:
       - jobs_network
 
@@ -34,3 +75,7 @@ services:
 networks:
   jobs_network:
     external: true
+
+
+volumes:
+  postgres_data:
