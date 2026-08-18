@@ -23,7 +23,6 @@ services:
     volumes:
       - ./fe:/usr/src/app
       - /usr/src/app/node_modules
-      - /usr/src/app/.next
     extra_hosts:
       - "host.docker.internal:host-gateway"
     depends_on:

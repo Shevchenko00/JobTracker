@@ -1,2 +1,5 @@
 .idea
 *.xml
+*.pyc
+*.sqlite3
+.env
