@@ -20,7 +20,8 @@ services:
       POSTGRES_PASSWORD: jobs_password
 
     depends_on:
-      - jobs_postgres
+      jobs_postgres:
+        condition: service_healthy
 
     networks:
       - jobs_network
@@ -66,10 +67,17 @@ services:
       - postgres_data:/var/lib/postgresql/data
 
     ports:
-      - "5432:5432"
+      - "5433:5432"
 
     networks:
       - jobs_network
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U jobs -d jobs"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
 
 
 networks:
