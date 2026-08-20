@@ -1,42 +1,50 @@
 import { useState } from 'react'
 import styles from './App.module.scss'
 
+type ApplicationStatus = 'pending' | 'accepted' | 'rejected'
+
 type Application = {
   id: number
-  company: string
+  company_name: string
   description: string
-  date: string
-  result: 'На рассмотрении' | 'Приглашение' | 'Отказ'
+  applied_at: string
+  status: ApplicationStatus
+}
+
+const statusLabels: Record<ApplicationStatus, string> = {
+  pending: 'На рассмотрении',
+  accepted: 'Приглашение',
+  rejected: 'Отказ',
 }
 
 const initialApplications: Application[] = [
   {
     id: 1,
-    company: 'Google',
+    company_name: 'Google',
     description: 'Frontend Developer',
-    date: '18.08.2026',
-    result: 'На рассмотрении',
+    applied_at: '2026-08-18T12:00:00Z',
+    status: 'pending',
   },
   {
     id: 2,
-    company: 'Microsoft',
+    company_name: 'Microsoft',
     description: 'React Developer',
-    date: '15.08.2026',
-    result: 'Приглашение',
+    applied_at: '2026-08-15T12:00:00Z',
+    status: 'accepted',
   },
   {
     id: 3,
-    company: 'Apple',
+    company_name: 'Apple',
     description: 'Software Engineer',
-    date: '12.08.2026',
-    result: 'Отказ',
+    applied_at: '2026-08-12T12:00:00Z',
+    status: 'rejected',
   },
   {
     id: 4,
-    company: 'Yandex',
+    company_name: 'Yandex',
     description: 'Frontend Engineer',
-    date: '10.08.2026',
-    result: 'На рассмотрении',
+    applied_at: '2026-08-10T12:00:00Z',
+    status: 'pending',
   },
 ]
 
@@ -48,33 +56,57 @@ function App() {
 
   const [company, setCompany] = useState('')
   const [description, setDescription] = useState('')
-  const [date, setDate] = useState('')
   const [result, setResult] =
-    useState<Application['result']>('На рассмотрении')
+    useState<ApplicationStatus>('pending')
 
-  const handleCreateApplication = () => {
-    if (!company || !description || !date) {
+  const handleCreateApplication = async () => {
+    if (!company || !description) {
       return
     }
 
-    const newApplication: Application = {
-      id: Date.now(),
-      company,
-      description,
-      date: new Date(date).toLocaleDateString('ru-RU'),
-      result,
+    try {
+      const response = await fetch(
+        'http://localhost:9212/jobs/create/',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            company_name: company,
+            description,
+            status: result,
+          }),
+        }
+      )
+
+      if (!response.ok) {
+        throw new Error(
+          `Ошибка создания заявки: ${response.status}`
+        )
+      }
+
+      const newApplication: Application =
+        await response.json()
+
+      setApplications((prev) => [
+        ...prev,
+        newApplication,
+      ])
+
+      // Очищаем форму
+      setCompany('')
+      setDescription('')
+      setResult('pending')
+
+      // Закрываем модалку
+      setIsModalOpen(false)
+    } catch (error) {
+      console.error(
+        'Ошибка при создании заявки:',
+        error
+      )
     }
-
-    setApplications((prev) => [...prev, newApplication])
-
-    // Очищаем форму
-    setCompany('')
-    setDescription('')
-    setDate('')
-    setResult('На рассмотрении')
-
-    // Закрываем модалку
-    setIsModalOpen(false)
   }
 
   return (
@@ -82,7 +114,9 @@ function App() {
       <div className={styles.container}>
         <header className={styles.header}>
           <div>
-            <h1 className={styles.title}>Мои заявки</h1>
+            <h1 className={styles.title}>
+              Мои заявки
+            </h1>
 
             <p className={styles.subtitle}>
               Отслеживание откликов на вакансии
@@ -113,7 +147,7 @@ function App() {
               {applications.map((application) => (
                 <tr key={application.id}>
                   <td className={styles.company}>
-                    {application.company}
+                    {application.company_name}
                   </td>
 
                   <td>
@@ -121,20 +155,24 @@ function App() {
                   </td>
 
                   <td className={styles.date}>
-                    {application.date}
+                    {new Date(
+                      application.applied_at
+                    ).toLocaleDateString('ru-RU')}
                   </td>
 
                   <td>
                     <span
                       className={`${styles.status} ${
-                        application.result === 'Приглашение'
+                        application.status === 'accepted'
                           ? styles.success
-                          : application.result === 'Отказ'
+                          : application.status === 'rejected'
                             ? styles.rejected
                             : styles.pending
                       }`}
                     >
-                      {application.result}
+                      {statusLabels[
+                        application.status
+                      ]}
                     </span>
                   </td>
                 </tr>
@@ -151,7 +189,9 @@ function App() {
         >
           <div
             className={styles.modal}
-            onClick={(event) => event.stopPropagation()}
+            onClick={(event) =>
+              event.stopPropagation()
+            }
           >
             <div className={styles.modalHeader}>
               <div>
@@ -164,7 +204,9 @@ function App() {
 
               <button
                 className={styles.closeButton}
-                onClick={() => setIsModalOpen(false)}
+                onClick={() =>
+                  setIsModalOpen(false)
+                }
               >
                 ×
               </button>
@@ -198,19 +240,9 @@ function App() {
                   placeholder="Например, Frontend Developer"
                   value={description}
                   onChange={(event) =>
-                    setDescription(event.target.value)
-                  }
-                />
-              </label>
-
-              <label>
-                Дата подачи
-
-                <input
-                  type="date"
-                  value={date}
-                  onChange={(event) =>
-                    setDate(event.target.value)
+                    setDescription(
+                      event.target.value
+                    )
                   }
                 />
               </label>
@@ -222,19 +254,20 @@ function App() {
                   value={result}
                   onChange={(event) =>
                     setResult(
-                      event.target.value as Application['result']
+                      event.target
+                        .value as ApplicationStatus
                     )
                   }
                 >
-                  <option value="На рассмотрении">
+                  <option value="pending">
                     На рассмотрении
                   </option>
 
-                  <option value="Приглашение">
+                  <option value="accepted">
                     Приглашение
                   </option>
 
-                  <option value="Отказ">
+                  <option value="rejected">
                     Отказ
                   </option>
                 </select>
@@ -254,4 +287,4 @@ function App() {
   )
 }
 
-export default App;
+export default App
