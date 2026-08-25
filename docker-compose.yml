@@ -64,7 +64,9 @@ services:
       POSTGRES_PASSWORD: jobs_password
 
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - jobs_postgres_data:/var/lib/postgresql/data
+      - ./backups:/backups
+      - ./backend/init-restore.sh:/docker-entrypoint-initdb.d/init-restore.sh
 
     ports:
       - "5433:5432"
@@ -73,11 +75,43 @@ services:
       - jobs_network
 
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U jobs -d jobs"]
+      test: [ "CMD-SHELL", "pg_isready -U jobs -d jobs" ]
       interval: 5s
       timeout: 5s
       retries: 10
       start_period: 10s
+
+
+  jobs_backup:
+    image: postgres:17
+    container_name: jobs_backup
+    restart: unless-stopped
+
+    environment:
+      PGPASSWORD: jobs_password
+
+    entrypoint: >
+      sh -c "
+        mkdir -p /backups &&
+        while true; do
+          echo \"[backup] $$(date): starting dump\";
+          pg_dump -h jobs_postgres -U jobs -d jobs > /backups/jobs_$$(date +%Y%m%d_%H%M%S).sql &&
+          echo \"[backup] $$(date): dump done\" ||
+          echo \"[backup] $$(date): dump FAILED\";
+          find /backups -name 'jobs_*.sql' -mtime +7 -delete;
+          sleep 86400;
+        done
+      "
+
+    volumes:
+      - ./backups:/backups
+
+    networks:
+      - jobs_network
+
+    depends_on:
+      jobs_postgres:
+        condition: service_healthy
 
 
 networks:
@@ -86,4 +120,5 @@ networks:
 
 
 volumes:
-  postgres_data:
+  jobs_postgres_data:
+    external: true
