@@ -1,4 +1,6 @@
-import {useEffect, useState} from 'react'
+import { useEffect, useState } from 'react'
+import jsPDF from 'jspdf'
+import autoTable from 'jspdf-autotable'
 import styles from './App.module.scss'
 
 type ApplicationStatus = 'pending' | 'accepted' | 'rejected'
@@ -12,9 +14,9 @@ type Application = {
 }
 
 const statusLabels: Record<ApplicationStatus, string> = {
-    pending: 'На рассмотрении',
-    accepted: 'Приглашение',
-    rejected: 'Отказ',
+    pending: 'In Bearbeitung',
+    accepted: 'Einladung',
+    rejected: 'Absage',
 }
 
 function App() {
@@ -56,6 +58,7 @@ function App() {
                     'Ошибка при загрузке заявок:',
                     error
                 )
+
                 setLoadError(true)
             } finally {
                 setIsLoading(false)
@@ -82,7 +85,8 @@ function App() {
 
             setApplications((prev) =>
                 prev.filter(
-                    (application) => application.id !== id
+                    (application) =>
+                        application.id !== id
                 )
             )
         } catch (error) {
@@ -94,7 +98,7 @@ function App() {
     }
 
     const handleCreateApplication = async () => {
-        if (!company || !description) {
+        if (!company.trim() || !description.trim()) {
             return
         }
 
@@ -131,7 +135,6 @@ function App() {
             setCompany('')
             setDescription('')
             setResult('pending')
-
             setIsModalOpen(false)
         } catch (error) {
             console.error(
@@ -141,41 +144,258 @@ function App() {
         }
     }
 
+    const handleExportPDF = () => {
+        if (applications.length === 0) {
+            return
+        }
+
+        const doc = new jsPDF({
+            orientation: 'landscape',
+            unit: 'mm',
+            format: 'a4',
+        })
+
+        const total = applications.length
+
+        const pending = applications.filter(
+            (app) => app.status === 'pending'
+        ).length
+
+        const accepted = applications.filter(
+            (app) => app.status === 'accepted'
+        ).length
+
+        const rejected = applications.filter(
+            (app) => app.status === 'rejected'
+        ).length
+
+        /*
+         * Header
+         */
+        doc.setTextColor(24, 24, 27)
+        doc.setFont('helvetica', 'bold')
+        doc.setFontSize(22)
+
+        doc.text('Meine Bewerbungen', 14, 18)
+
+        doc.setFont('helvetica', 'normal')
+        doc.setFontSize(10)
+        doc.setTextColor(113, 113, 122)
+
+        doc.text(
+            'Übersicht meiner Bewerbungen',
+            14,
+            25
+        )
+
+        /*
+         * Statistics
+         */
+        const statsY = 36
+
+        doc.setFontSize(10)
+        doc.setTextColor(63, 63, 70)
+
+        doc.setFont('helvetica', 'bold')
+        doc.text('Gesamt', 14, statsY)
+
+        doc.setFont('helvetica', 'normal')
+        doc.text(String(total), 14, statsY + 6)
+
+        doc.setFont('helvetica', 'bold')
+        doc.text('Offen', 55, statsY)
+
+        doc.setFont('helvetica', 'normal')
+        doc.text(String(pending), 55, statsY + 6)
+
+        doc.setFont('helvetica', 'bold')
+        doc.text('Einladungen', 95, statsY)
+
+        doc.setFont('helvetica', 'normal')
+        doc.text(String(accepted), 95, statsY + 6)
+
+        doc.setFont('helvetica', 'bold')
+        doc.text('Absagen', 145, statsY)
+
+        doc.setFont('helvetica', 'normal')
+        doc.text(String(rejected), 145, statsY + 6)
+
+        /*
+         * Table
+         */
+        autoTable(doc, {
+            startY: 50,
+
+            head: [
+                [
+                    'Unternehmen',
+                    'Position / Beschreibung',
+                    'Datum',
+                    'Status',
+                ],
+            ],
+
+            body: applications.map((application) => [
+                application.company_name,
+                application.description,
+                new Date(
+                    application.applied_at
+                ).toLocaleDateString('de-DE'),
+                statusLabels[application.status],
+            ]),
+
+            theme: 'grid',
+
+            styles: {
+                font: 'helvetica',
+                fontSize: 9,
+                cellPadding: 4,
+                textColor: [63, 63, 70],
+                lineColor: [228, 228, 231],
+                lineWidth: 0.2,
+                valign: 'middle',
+            },
+
+            headStyles: {
+                fillColor: [250, 250, 250],
+                textColor: [82, 82, 91],
+                fontStyle: 'bold',
+                lineColor: [228, 228, 231],
+                lineWidth: 0.2,
+            },
+
+            alternateRowStyles: {
+                fillColor: [252, 252, 253],
+            },
+
+            columnStyles: {
+                0: {
+                    cellWidth: 55,
+                    fontStyle: 'bold',
+                    textColor: [24, 24, 27],
+                },
+
+                1: {
+                    cellWidth: 105,
+                },
+
+                2: {
+                    cellWidth: 35,
+                },
+
+                3: {
+                    cellWidth: 45,
+                },
+            },
+
+            margin: {
+                left: 14,
+                right: 14,
+            },
+        })
+
+        /*
+         * Footer
+         */
+        const pageCount = doc.getNumberOfPages()
+
+        for (let page = 1; page <= pageCount; page++) {
+            doc.setPage(page)
+
+            const pageWidth =
+                doc.internal.pageSize.getWidth()
+
+            const pageHeight =
+                doc.internal.pageSize.getHeight()
+
+            doc.setDrawColor(228, 228, 231)
+
+            doc.line(
+                14,
+                pageHeight - 16,
+                pageWidth - 14,
+                pageHeight - 16
+            )
+
+            doc.setFont('helvetica', 'normal')
+            doc.setFontSize(8)
+            doc.setTextColor(161, 161, 170)
+
+            doc.text(
+                `Seite ${page} von ${pageCount}`,
+                14,
+                pageHeight - 9
+            )
+
+            const dateText =
+                `Erstellt am ${new Date().toLocaleDateString('de-DE')}`
+
+            doc.text(
+                dateText,
+                pageWidth - 14,
+                pageHeight - 9,
+                {
+                    align: 'right',
+                }
+            )
+        }
+
+        /*
+         * Download
+         */
+        doc.save('meine-bewerbungen.pdf')
+    }
+
     return (
         <main className={styles.app}>
             <div className={styles.container}>
                 <header className={styles.header}>
                     <div>
                         <h1 className={styles.title}>
-                            Мои заявки
+                            Meine Bewerbungen
                         </h1>
 
                         <p className={styles.subtitle}>
-                            Отслеживание откликов на вакансии
+                            Ubersicht meiner Bewerbungen
                         </p>
                     </div>
 
-                    <button
-                        className={styles.createButton}
-                        onClick={() => setIsModalOpen(true)}
-                    >
-                        <span>+</span>
-                        Создать заявку
-                    </button>
+                    <div className={styles.headerActions}>
+                        <button
+                            className={styles.exportButton}
+                            onClick={handleExportPDF}
+                            disabled={
+                                applications.length === 0 ||
+                                isLoading
+                            }
+                            type="button"
+                        >
+                            <span>↓</span>
+                            PDF exportieren
+                        </button>
+
+                        <button
+                            className={styles.createButton}
+                            onClick={() => setIsModalOpen(true)}
+                            type="button"
+                        >
+                            <span>+</span>
+                            Bewerbung hinzufugen
+                        </button>
+                    </div>
                 </header>
 
                 <div className={styles.tableWrapper}>
                     <table className={styles.table}>
                         <thead>
                         <tr>
-                            <th>Компания</th>
-                            <th>Описание</th>
-                            <th>Дата подачи</th>
-                            <th>Результат</th>
-                            <th className={styles.actionsHead}></th>
+                            <th>Unternehmen</th>
+                            <th>Position / Beschreibung</th>
+                            <th>Bewerbungsdatum</th>
+                            <th>Status</th>
+                            <th className={styles.actionsHead} />
                         </tr>
                         </thead>
-
                         <tbody>
                         {isLoading ? (
                             <tr>
@@ -183,7 +403,7 @@ function App() {
                                     className={styles.empty}
                                     colSpan={5}
                                 >
-                                    Загрузка заявок...
+                                    Bewerbungen werden geladen...
                                 </td>
                             </tr>
                         ) : loadError ? (
@@ -192,66 +412,95 @@ function App() {
                                     className={styles.empty}
                                     colSpan={5}
                                 >
-                                    Не удалось загрузить заявки.
-                                    Попробуйте обновить страницу.
+                                    Bewerbungen konnten nicht geladen werden.
+                                    <br />
+                                    Bitte versuchen Sie es erneut.
                                 </td>
                             </tr>
                         ) : applications.length !== 0 ? (
-                            applications.map((application) => (
-                                <tr key={application.id}>
-                                    <td className={styles.company}>
-                                        {application.company_name}
-                                    </td>
-
-                                    <td>
-                                        {application.description}
-                                    </td>
-
-                                    <td className={styles.date}>
-                                        {new Date(
-                                            application.applied_at
-                                        ).toLocaleDateString('ru-RU')}
-                                    </td>
-
-                                    <td>
-                    <span
-                        className={`${styles.status} ${
-                            application.status === 'accepted'
-                                ? styles.success
-                                : application.status === 'rejected'
-                                    ? styles.rejected
-                                    : styles.pending
-                        }`}
-                    >
-                      {statusLabels[
-                          application.status
-                          ]}
-                    </span>
-                                    </td>
-
-                                    <td className={styles.actions}>
-                                        <button
-                                            className={styles.deleteButton}
-                                            onClick={() =>
-                                                handleDeleteApplication(
-                                                    application.id
-                                                )
+                            applications.map(
+                                (application) => (
+                                    <tr
+                                        key={
+                                            application.id
+                                        }
+                                    >
+                                        <td
+                                            className={
+                                                styles.company
                                             }
-                                            aria-label="Удалить заявку"
-                                            title="Удалить заявку"
                                         >
-                                            ×
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))
+                                            {
+                                                application.company_name
+                                            }
+                                        </td>
+
+                                        <td>
+                                            {
+                                                application.description
+                                            }
+                                        </td>
+
+                                        <td
+                                            className={
+                                                styles.date
+                                            }
+                                        >
+                                            {new Date(
+                                                application.applied_at
+                                            ).toLocaleDateString(
+                                                'ru-RU'
+                                            )}
+                                        </td>
+
+                                        <td>
+                                                <span
+                                                    className={`${styles.status} ${
+                                                        application.status ===
+                                                        'accepted'
+                                                            ? styles.success
+                                                            : application.status ===
+                                                            'rejected'
+                                                                ? styles.rejected
+                                                                : styles.pending
+                                                    }`}
+                                                >
+                                                    {
+                                                        statusLabels[
+                                                            application
+                                                                .status
+                                                            ]
+                                                    }
+                                                </span>
+                                        </td>
+
+                                        <td
+                                            className={
+                                                styles.actions
+                                            }
+                                        >
+                                            <button
+                                                className={styles.deleteButton}
+                                                onClick={() =>
+                                                    handleDeleteApplication(application.id)
+                                                }
+                                                aria-label="Bewerbung loschen"
+                                                title="Bewerbung loschen"
+                                                type="button"
+                                            >
+                                                ×
+                                            </button>
+                                        </td>
+                                    </tr>
+                                )
+                            )
                         ) : (
                             <tr>
                                 <td
                                     className={styles.empty}
                                     colSpan={5}
                                 >
-                                    Пока нет ни одной заявки
+                                    Noch keine Bewerbungen vorhanden
                                 </td>
                             </tr>
                         )}
@@ -263,7 +512,9 @@ function App() {
             {isModalOpen && (
                 <div
                     className={styles.overlay}
-                    onClick={() => setIsModalOpen(false)}
+                    onClick={() =>
+                        setIsModalOpen(false)
+                    }
                 >
                     <div
                         className={styles.modal}
@@ -271,24 +522,14 @@ function App() {
                             event.stopPropagation()
                         }
                     >
-                        <div className={styles.modalHeader}>
-                            <div>
-                                <h2>Новая заявка</h2>
-
-                                <p>
-                                    Добавьте информацию о вакансии
-                                </p>
-                            </div>
-
-                            <button
-                                className={styles.closeButton}
-                                onClick={() =>
-                                    setIsModalOpen(false)
-                                }
+                        <tr>
+                            <td
+                                className={styles.empty}
+                                colSpan={5}
                             >
-                                ×
-                            </button>
-                        </div>
+                                Noch keine Bewerbungen vorhanden
+                            </td>
+                        </tr>
 
                         <form
                             className={styles.form}
@@ -298,11 +539,11 @@ function App() {
                             }}
                         >
                             <label>
-                                Компания
+                                Unternehmen
 
                                 <input
                                     type="text"
-                                    placeholder="Например, Google"
+                                    placeholder="Zum Beispiel Google"
                                     value={company}
                                     onChange={(event) =>
                                         setCompany(event.target.value)
@@ -311,42 +552,39 @@ function App() {
                             </label>
 
                             <label>
-                                Описание
+                                Position / Beschreibung
 
                                 <input
                                     type="text"
-                                    placeholder="Например, Frontend Developer"
+                                    placeholder="Zum Beispiel Frontend Developer"
                                     value={description}
                                     onChange={(event) =>
-                                        setDescription(
-                                            event.target.value
-                                        )
+                                        setDescription(event.target.value)
                                     }
                                 />
                             </label>
 
                             <label>
-                                Результат
+                                Status
 
                                 <select
                                     value={result}
                                     onChange={(event) =>
                                         setResult(
-                                            event.target
-                                                .value as ApplicationStatus
+                                            event.target.value as ApplicationStatus
                                         )
                                     }
                                 >
                                     <option value="pending">
-                                        На рассмотрении
+                                        In Bearbeitung
                                     </option>
 
                                     <option value="accepted">
-                                        Приглашение
+                                        Einladung
                                     </option>
 
                                     <option value="rejected">
-                                        Отказ
+                                        Absage
                                     </option>
                                 </select>
                             </label>
@@ -355,7 +593,7 @@ function App() {
                                 type="submit"
                                 className={styles.submitButton}
                             >
-                                Создать заявку
+                                Bewerbung erstellen
                             </button>
                         </form>
                     </div>
