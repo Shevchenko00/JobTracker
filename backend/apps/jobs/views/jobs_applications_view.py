@@ -16,6 +16,11 @@ class JobsApplicationDetailAPI(generics.RetrieveAPIView):
     serializer_class = JobsApplicationSerializer
 
 
+class JobsApplicationUpdateAPI(generics.UpdateAPIView):
+    queryset = JobsApplicationModel.objects.all()
+    serializer_class = JobsApplicationSerializer
+
+
 class JobsApplicationDeleteAPI(generics.DestroyAPIView):
     queryset = JobsApplicationModel.objects.all()
     serializer_class = JobsApplicationSerializer

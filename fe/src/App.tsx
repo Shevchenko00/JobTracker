@@ -19,6 +19,15 @@ const statusLabels: Record<ApplicationStatus, string> = {
     rejected: 'Absage',
 }
 
+const getTodayDateString = () => {
+    const now = new Date()
+    const year = now.getFullYear()
+    const month = String(now.getMonth() + 1).padStart(2, '0')
+    const day = String(now.getDate()).padStart(2, '0')
+
+    return `${year}-${month}-${day}`
+}
+
 function App() {
     const [applications, setApplications] =
         useState<Application[]>([])
@@ -27,11 +36,19 @@ function App() {
     const [loadError, setLoadError] = useState(false)
 
     const [isModalOpen, setIsModalOpen] = useState(false)
+    const [editingId, setEditingId] = useState<number | null>(
+        null
+    )
 
     const [company, setCompany] = useState('')
     const [description, setDescription] = useState('')
+    const [appliedAt, setAppliedAt] = useState(
+        getTodayDateString()
+    )
     const [result, setResult] =
         useState<ApplicationStatus>('pending')
+
+    const isEditing = editingId !== null
 
     useEffect(() => {
         const fetchApplications = async () => {
@@ -68,6 +85,37 @@ function App() {
         fetchApplications()
     }, [])
 
+    const resetForm = () => {
+        setCompany('')
+        setDescription('')
+        setAppliedAt(getTodayDateString())
+        setResult('pending')
+        setEditingId(null)
+    }
+
+    const handleCloseModal = () => {
+        setIsModalOpen(false)
+        resetForm()
+    }
+
+    const handleOpenCreateModal = () => {
+        resetForm()
+        setIsModalOpen(true)
+    }
+
+    const handleOpenEditModal = (
+        application: Application
+    ) => {
+        setEditingId(application.id)
+        setCompany(application.company_name)
+        setDescription(application.description)
+        setAppliedAt(
+            application.applied_at.slice(0, 10)
+        )
+        setResult(application.status)
+        setIsModalOpen(true)
+    }
+
     const handleDeleteApplication = async (id: number) => {
         try {
             const response = await fetch(
@@ -98,10 +146,6 @@ function App() {
     }
 
     const handleCreateApplication = async () => {
-        if (!company.trim() || !description.trim()) {
-            return
-        }
-
         try {
             const response = await fetch(
                 'http://localhost:9212/jobs/create/',
@@ -113,6 +157,7 @@ function App() {
                     body: JSON.stringify({
                         company_name: company,
                         description,
+                        applied_at: appliedAt,
                         status: result,
                     }),
                 }
@@ -131,17 +176,72 @@ function App() {
                 ...prev,
                 newApplication,
             ])
-
-            setCompany('')
-            setDescription('')
-            setResult('pending')
-            setIsModalOpen(false)
         } catch (error) {
             console.error(
                 'Ошибка при создании заявки:',
                 error
             )
         }
+    }
+
+    const handleUpdateApplication = async (id: number) => {
+        try {
+            const response = await fetch(
+                `http://localhost:9212/jobs/update/${id}/`,
+                {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        company_name: company,
+                        description,
+                        applied_at: appliedAt,
+                        status: result,
+                    }),
+                }
+            )
+
+            if (!response.ok) {
+                throw new Error(
+                    `Ошибка обновления заявки: ${response.status}`
+                )
+            }
+
+            const updatedApplication: Application =
+                await response.json()
+
+            setApplications((prev) =>
+                prev.map((application) =>
+                    application.id === id
+                        ? updatedApplication
+                        : application
+                )
+            )
+        } catch (error) {
+            console.error(
+                'Ошибка при обновлении заявки:',
+                error
+            )
+        }
+    }
+
+    const handleSubmit = async () => {
+        if (
+            !company.trim() ||
+            !description.trim() ||
+            !appliedAt
+        ) {
+            return
+        }
+
+        if (isEditing && editingId !== null) {
+            await handleUpdateApplication(editingId)
+        } else {
+            await handleCreateApplication()
+        }
+
+        handleCloseModal()
     }
 
     const handleExportPDF = () => {
@@ -376,7 +476,7 @@ function App() {
 
                         <button
                             className={styles.createButton}
-                            onClick={() => setIsModalOpen(true)}
+                            onClick={handleOpenCreateModal}
                             type="button"
                         >
                             <span>+</span>
@@ -480,6 +580,18 @@ function App() {
                                             }
                                         >
                                             <button
+                                                className={styles.editButton}
+                                                onClick={() =>
+                                                    handleOpenEditModal(application)
+                                                }
+                                                aria-label="Bewerbung bearbeiten"
+                                                title="Bewerbung bearbeiten"
+                                                type="button"
+                                            >
+                                                ✎
+                                            </button>
+
+                                            <button
                                                 className={styles.deleteButton}
                                                 onClick={() =>
                                                     handleDeleteApplication(application.id)
@@ -512,9 +624,7 @@ function App() {
             {isModalOpen && (
                 <div
                     className={styles.overlay}
-                    onClick={() =>
-                        setIsModalOpen(false)
-                    }
+                    onClick={handleCloseModal}
                 >
                     <div
                         className={styles.modal}
@@ -522,20 +632,37 @@ function App() {
                             event.stopPropagation()
                         }
                     >
-                        <tr>
-                            <td
-                                className={styles.empty}
-                                colSpan={5}
+                        <div className={styles.modalHeader}>
+                            <div>
+                                <h2>
+                                    {isEditing
+                                        ? 'Bewerbung bearbeiten'
+                                        : 'Bewerbung hinzufugen'}
+                                </h2>
+
+                                <p>
+                                    {isEditing
+                                        ? 'Andern Sie die Angaben zu Ihrer Bewerbung'
+                                        : 'Tragen Sie die Angaben zu Ihrer Bewerbung ein'}
+                                </p>
+                            </div>
+
+                            <button
+                                className={styles.closeButton}
+                                onClick={handleCloseModal}
+                                aria-label="Schliessen"
+                                title="Schliessen"
+                                type="button"
                             >
-                                Noch keine Bewerbungen vorhanden
-                            </td>
-                        </tr>
+                                ×
+                            </button>
+                        </div>
 
                         <form
                             className={styles.form}
                             onSubmit={(event) => {
                                 event.preventDefault()
-                                handleCreateApplication()
+                                handleSubmit()
                             }}
                         >
                             <label>
@@ -560,6 +687,18 @@ function App() {
                                     value={description}
                                     onChange={(event) =>
                                         setDescription(event.target.value)
+                                    }
+                                />
+                            </label>
+
+                            <label>
+                                Bewerbungsdatum
+
+                                <input
+                                    type="date"
+                                    value={appliedAt}
+                                    onChange={(event) =>
+                                        setAppliedAt(event.target.value)
                                     }
                                 />
                             </label>
@@ -593,7 +732,9 @@ function App() {
                                 type="submit"
                                 className={styles.submitButton}
                             >
-                                Bewerbung erstellen
+                                {isEditing
+                                    ? 'Anderungen speichern'
+                                    : 'Bewerbung erstellen'}
                             </button>
                         </form>
                     </div>

@@ -13,8 +13,7 @@ class JobsApplicationModel(models.Model):
         ],
         default="pending",
     )
-    applied_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
-
+    applied_at = models.DateField(blank=True, null=True)
     class Meta:
         db_table = "job_applications"
         verbose_name = "Job Application"
