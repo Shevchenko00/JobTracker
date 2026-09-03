@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 import styles from './App.module.scss'
 
 type ApplicationStatus = 'pending' | 'accepted' | 'rejected'
+type Ordering = 'applied_at' | '-applied_at' | 'company_name' | '-company_name'
 
 type Application = {
     id: number
@@ -19,6 +20,15 @@ const statusLabels: Record<ApplicationStatus, string> = {
     rejected: 'Absage',
 }
 
+const statusOrder: ApplicationStatus[] = ['pending', 'accepted', 'rejected']
+
+const orderingLabels: Record<Ordering, string> = {
+    '-applied_at': 'Neueste zuerst',
+    applied_at: 'Älteste zuerst',
+    company_name: 'Unternehmen A-Z',
+    '-company_name': 'Unternehmen Z-A',
+}
+
 const getTodayDateString = () => {
     const now = new Date()
     const year = now.getFullYear()
@@ -27,6 +37,8 @@ const getTodayDateString = () => {
 
     return `${year}-${month}-${day}`
 }
+
+const API_BASE = 'http://localhost:9212/jobs'
 
 function App() {
     const [applications, setApplications] =
@@ -48,7 +60,62 @@ function App() {
     const [result, setResult] =
         useState<ApplicationStatus>('pending')
 
+    // --- Filter ---
+    const [searchInput, setSearchInput] = useState('')
+    const [searchQuery, setSearchQuery] = useState('')
+    const [activeStatuses, setActiveStatuses] = useState<
+        ApplicationStatus[]
+    >([])
+    const [dateFrom, setDateFrom] = useState('')
+    const [dateTo, setDateTo] = useState('')
+    const [ordering, setOrdering] =
+        useState<Ordering>('-applied_at')
+    const [isFiltersOpen, setIsFiltersOpen] = useState(false)
+
     const isEditing = editingId !== null
+
+    const hasActiveFilters =
+        searchQuery.trim() !== '' ||
+        activeStatuses.length > 0 ||
+        dateFrom !== '' ||
+        dateTo !== ''
+
+    // Debounce der Freitextsuche, damit nicht bei jedem Tastenanschlag ein Request rausgeht
+    useEffect(() => {
+        const timeout = setTimeout(() => {
+            setSearchQuery(searchInput.trim())
+        }, 350)
+
+        return () => clearTimeout(timeout)
+    }, [searchInput])
+
+    const buildQueryString = () => {
+        const params = new URLSearchParams()
+
+        if (searchQuery) {
+            params.set('search', searchQuery)
+        }
+
+        if (activeStatuses.length > 0) {
+            params.set('status', activeStatuses.join(','))
+        }
+
+        if (dateFrom) {
+            params.set('date_from', dateFrom)
+        }
+
+        if (dateTo) {
+            params.set('date_to', dateTo)
+        }
+
+        if (ordering) {
+            params.set('ordering', ordering)
+        }
+
+        const query = params.toString()
+
+        return query ? `?${query}` : ''
+    }
 
     useEffect(() => {
         const fetchApplications = async () => {
@@ -57,12 +124,12 @@ function App() {
 
             try {
                 const response = await fetch(
-                    'http://localhost:9212/jobs/'
+                    `${API_BASE}/${buildQueryString()}`
                 )
 
                 if (!response.ok) {
                     throw new Error(
-                        `Ошибка загрузки заявок: ${response.status}`
+                        `Fehler beim Laden der Bewerbungen: ${response.status}`
                     )
                 }
 
@@ -72,7 +139,7 @@ function App() {
                 setApplications(data)
             } catch (error) {
                 console.error(
-                    'Ошибка при загрузке заявок:',
+                    'Fehler beim Laden der Bewerbungen:',
                     error
                 )
 
@@ -83,7 +150,38 @@ function App() {
         }
 
         fetchApplications()
-    }, [])
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [searchQuery, activeStatuses, dateFrom, dateTo, ordering])
+
+    const toggleStatusFilter = (status: ApplicationStatus) => {
+        setActiveStatuses((prev) =>
+            prev.includes(status)
+                ? prev.filter((item) => item !== status)
+                : [...prev, status]
+        )
+    }
+
+    const handleResetFilters = () => {
+        setSearchInput('')
+        setSearchQuery('')
+        setActiveStatuses([])
+        setDateFrom('')
+        setDateTo('')
+        setOrdering('-applied_at')
+    }
+
+    const statusCounts = useMemo(() => {
+        return applications.reduce(
+            (acc, application) => {
+                acc[application.status] += 1
+                return acc
+            },
+            { pending: 0, accepted: 0, rejected: 0 } as Record<
+                ApplicationStatus,
+                number
+            >
+        )
+    }, [applications])
 
     const resetForm = () => {
         setCompany('')
@@ -119,7 +217,7 @@ function App() {
     const handleDeleteApplication = async (id: number) => {
         try {
             const response = await fetch(
-                `http://localhost:9212/jobs/delete/${id}/`,
+                `${API_BASE}/delete/${id}/`,
                 {
                     method: 'DELETE',
                 }
@@ -127,7 +225,7 @@ function App() {
 
             if (!response.ok) {
                 throw new Error(
-                    `Ошибка удаления заявки: ${response.status}`
+                    `Fehler beim Löschen der Bewerbung: ${response.status}`
                 )
             }
 
@@ -139,7 +237,7 @@ function App() {
             )
         } catch (error) {
             console.error(
-                'Ошибка при удалении заявки:',
+                'Fehler beim Löschen der Bewerbung:',
                 error
             )
         }
@@ -148,7 +246,7 @@ function App() {
     const handleCreateApplication = async () => {
         try {
             const response = await fetch(
-                'http://localhost:9212/jobs/create/',
+                `${API_BASE}/create/`,
                 {
                     method: 'POST',
                     headers: {
@@ -165,7 +263,7 @@ function App() {
 
             if (!response.ok) {
                 throw new Error(
-                    `Ошибка создания заявки: ${response.status}`
+                    `Fehler beim Erstellen der Bewerbung: ${response.status}`
                 )
             }
 
@@ -173,12 +271,12 @@ function App() {
                 await response.json()
 
             setApplications((prev) => [
-                ...prev,
                 newApplication,
+                ...prev,
             ])
         } catch (error) {
             console.error(
-                'Ошибка при создании заявки:',
+                'Fehler beim Erstellen der Bewerbung:',
                 error
             )
         }
@@ -187,7 +285,7 @@ function App() {
     const handleUpdateApplication = async (id: number) => {
         try {
             const response = await fetch(
-                `http://localhost:9212/jobs/update/${id}/`,
+                `${API_BASE}/update/${id}/`,
                 {
                     method: 'PATCH',
                     headers: {
@@ -204,7 +302,7 @@ function App() {
 
             if (!response.ok) {
                 throw new Error(
-                    `Ошибка обновления заявки: ${response.status}`
+                    `Fehler beim Aktualisieren der Bewerbung: ${response.status}`
                 )
             }
 
@@ -220,7 +318,7 @@ function App() {
             )
         } catch (error) {
             console.error(
-                'Ошибка при обновлении заявки:',
+                'Fehler beim Aktualisieren der Bewerbung:',
                 error
             )
         }
@@ -456,7 +554,7 @@ function App() {
                         </h1>
 
                         <p className={styles.subtitle}>
-                            Ubersicht meiner Bewerbungen
+                            Übersicht meiner Bewerbungen
                         </p>
                     </div>
 
@@ -480,10 +578,132 @@ function App() {
                             type="button"
                         >
                             <span>+</span>
-                            Bewerbung hinzufugen
+                            Bewerbung hinzufügen
                         </button>
                     </div>
                 </header>
+
+                {/* --- Filterleiste --- */}
+                <section className={styles.filtersBar}>
+                    <div className={styles.searchField}>
+                        <span className={styles.searchIcon}>⚲</span>
+
+                        <input
+                            type="text"
+                            placeholder="Suche nach Unternehmen oder Position..."
+                            value={searchInput}
+                            onChange={(event) =>
+                                setSearchInput(event.target.value)
+                            }
+                        />
+
+                        {searchInput && (
+                            <button
+                                type="button"
+                                className={styles.clearSearch}
+                                onClick={() => setSearchInput('')}
+                                aria-label="Suche löschen"
+                            >
+                                ×
+                            </button>
+                        )}
+                    </div>
+
+                    <div className={styles.statusPills}>
+                        {statusOrder.map((status) => (
+                            <button
+                                key={status}
+                                type="button"
+                                className={`${styles.pill} ${
+                                    activeStatuses.includes(status)
+                                        ? styles.pillActive
+                                        : ''
+                                } ${styles[`pill_${status}`]}`}
+                                onClick={() =>
+                                    toggleStatusFilter(status)
+                                }
+                            >
+                                {statusLabels[status]}
+                                <span className={styles.pillCount}>
+                                    {statusCounts[status]}
+                                </span>
+                            </button>
+                        ))}
+                    </div>
+
+                    <button
+                        type="button"
+                        className={styles.toggleFiltersButton}
+                        onClick={() =>
+                            setIsFiltersOpen((prev) => !prev)
+                        }
+                    >
+                        Datum & Sortierung {isFiltersOpen ? '▲' : '▼'}
+                    </button>
+
+                    {hasActiveFilters && (
+                        <button
+                            type="button"
+                            className={styles.resetFiltersButton}
+                            onClick={handleResetFilters}
+                        >
+                            Filter zurücksetzen
+                        </button>
+                    )}
+                </section>
+
+                {isFiltersOpen && (
+                    <section className={styles.filtersExpanded}>
+                        <label>
+                            Datum von
+
+                            <input
+                                type="date"
+                                value={dateFrom}
+                                onChange={(event) =>
+                                    setDateFrom(event.target.value)
+                                }
+                            />
+                        </label>
+
+                        <label>
+                            Datum bis
+
+                            <input
+                                type="date"
+                                value={dateTo}
+                                onChange={(event) =>
+                                    setDateTo(event.target.value)
+                                }
+                            />
+                        </label>
+
+                        <label>
+                            Sortierung
+
+                            <select
+                                value={ordering}
+                                onChange={(event) =>
+                                    setOrdering(
+                                        event.target
+                                            .value as Ordering
+                                    )
+                                }
+                            >
+                                {Object.entries(orderingLabels).map(
+                                    ([value, label]) => (
+                                        <option
+                                            key={value}
+                                            value={value}
+                                        >
+                                            {label}
+                                        </option>
+                                    )
+                                )}
+                            </select>
+                        </label>
+                    </section>
+                )}
 
                 <div className={styles.tableWrapper}>
                     <table className={styles.table}>
@@ -549,7 +769,7 @@ function App() {
                                             {new Date(
                                                 application.applied_at
                                             ).toLocaleDateString(
-                                                'ru-RU'
+                                                'de-DE'
                                             )}
                                         </td>
 
@@ -596,8 +816,8 @@ function App() {
                                                 onClick={() =>
                                                     handleDeleteApplication(application.id)
                                                 }
-                                                aria-label="Bewerbung loschen"
-                                                title="Bewerbung loschen"
+                                                aria-label="Bewerbung löschen"
+                                                title="Bewerbung löschen"
                                                 type="button"
                                             >
                                                 ×
@@ -612,7 +832,9 @@ function App() {
                                     className={styles.empty}
                                     colSpan={5}
                                 >
-                                    Noch keine Bewerbungen vorhanden
+                                    {hasActiveFilters
+                                        ? 'Für die gewählten Filter wurde nichts gefunden'
+                                        : 'Noch keine Bewerbungen vorhanden'}
                                 </td>
                             </tr>
                         )}
@@ -637,12 +859,12 @@ function App() {
                                 <h2>
                                     {isEditing
                                         ? 'Bewerbung bearbeiten'
-                                        : 'Bewerbung hinzufugen'}
+                                        : 'Bewerbung hinzufügen'}
                                 </h2>
 
                                 <p>
                                     {isEditing
-                                        ? 'Andern Sie die Angaben zu Ihrer Bewerbung'
+                                        ? 'Ändern Sie die Angaben zu Ihrer Bewerbung'
                                         : 'Tragen Sie die Angaben zu Ihrer Bewerbung ein'}
                                 </p>
                             </div>
@@ -650,8 +872,8 @@ function App() {
                             <button
                                 className={styles.closeButton}
                                 onClick={handleCloseModal}
-                                aria-label="Schliessen"
-                                title="Schliessen"
+                                aria-label="Schließen"
+                                title="Schließen"
                                 type="button"
                             >
                                 ×
@@ -733,7 +955,7 @@ function App() {
                                 className={styles.submitButton}
                             >
                                 {isEditing
-                                    ? 'Anderungen speichern'
+                                    ? 'Änderungen speichern'
                                     : 'Bewerbung erstellen'}
                             </button>
                         </form>
