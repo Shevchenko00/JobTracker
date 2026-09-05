@@ -6,9 +6,10 @@ import getTodayDateString from "./utils/getTodayDateString.ts";
 import type {Application, ApplicationStatus} from "./types/application.ts";
 import {statusLabels, statusOrder} from "./types/status.ts";
 import {type Ordering, orderingLabels} from "./types/ordering.ts";
-
+import type {PaginatedResponse} from "./types/pagination.ts";
 
 const API_BASE = import.meta.env.VITE_API_URL
+const PAGE_SIZE = 10
 
 function App() {
     const [applications, setApplications] =
@@ -42,6 +43,11 @@ function App() {
         useState<Ordering>('-applied_at')
     const [isFiltersOpen, setIsFiltersOpen] = useState(false)
 
+    // --- Pagination ---
+    const [page, setPage] = useState(1)
+    const [totalCount, setTotalCount] = useState(0)
+    const pageCount = Math.max(1, Math.ceil(totalCount / PAGE_SIZE))
+
     const isEditing = editingId !== null
 
     const hasActiveFilters =
@@ -59,7 +65,12 @@ function App() {
         return () => clearTimeout(timeout)
     }, [searchInput])
 
-    const buildQueryString = () => {
+    // Bei Änderung der Filter/Sortierung immer zurück auf Seite 1
+    useEffect(() => {
+        setPage(1)
+    }, [searchQuery, activeStatuses, dateFrom, dateTo, ordering])
+
+    const buildQueryString = (targetPage: number) => {
         const params = new URLSearchParams()
 
         if (searchQuery) {
@@ -82,46 +93,51 @@ function App() {
             params.set('ordering', ordering)
         }
 
+        if (targetPage > 1) {
+            params.set('page', String(targetPage))
+        }
+
         const query = params.toString()
 
         return query ? `?${query}` : ''
     }
 
-    useEffect(() => {
-        const fetchApplications = async () => {
-            setIsLoading(true)
-            setLoadError(false)
+    const fetchApplications = async (targetPage: number = page) => {
+        setIsLoading(true)
+        setLoadError(false)
 
-            try {
-                const response = await fetch(
-                    `${API_BASE}/${buildQueryString()}`
+        try {
+            const response = await fetch(
+                `${API_BASE}/${buildQueryString(targetPage)}`
+            )
+
+            if (!response.ok) {
+                throw new Error(
+                    `Fehler beim Laden der Bewerbungen: ${response.status}`
                 )
-
-                if (!response.ok) {
-                    throw new Error(
-                        `Fehler beim Laden der Bewerbungen: ${response.status}`
-                    )
-                }
-
-                const data: Application[] =
-                    await response.json()
-
-                setApplications(data)
-            } catch (error) {
-                console.error(
-                    'Fehler beim Laden der Bewerbungen:',
-                    error
-                )
-
-                setLoadError(true)
-            } finally {
-                setIsLoading(false)
             }
-        }
 
-        fetchApplications()
+            const data: PaginatedResponse<Application> =
+                await response.json()
+
+            setApplications(data.results)
+            setTotalCount(data.count)
+        } catch (error) {
+            console.error(
+                'Fehler beim Laden der Bewerbungen:',
+                error
+            )
+
+            setLoadError(true)
+        } finally {
+            setIsLoading(false)
+        }
+    }
+
+    useEffect(() => {
+        fetchApplications(page)
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [searchQuery, activeStatuses, dateFrom, dateTo, ordering])
+    }, [searchQuery, activeStatuses, dateFrom, dateTo, ordering, page])
 
     const toggleStatusFilter = (status: ApplicationStatus) => {
         setActiveStatuses((prev) =>
@@ -199,12 +215,17 @@ function App() {
                 )
             }
 
-            setApplications((prev) =>
-                prev.filter(
-                    (application) =>
-                        application.id !== id
-                )
-            )
+            // Wenn das letzte Element der Seite gelöscht wurde, eine Seite zurück,
+            // sonst aktuelle Seite neu laden, damit die Liste mit dem Server übereinstimmt.
+            const isLastItemOnPage = applications.length === 1
+            const targetPage =
+                isLastItemOnPage && page > 1 ? page - 1 : page
+
+            if (targetPage !== page) {
+                setPage(targetPage)
+            } else {
+                await fetchApplications(targetPage)
+            }
         } catch (error) {
             console.error(
                 'Fehler beim Löschen der Bewerbung:',
@@ -237,13 +258,13 @@ function App() {
                 )
             }
 
-            const newApplication: Application =
-                await response.json()
-
-            setApplications((prev) => [
-                newApplication,
-                ...prev,
-            ])
+            // Neue Bewerbung erstellt -> zurück auf Seite 1, damit sie sichtbar ist
+            // (Standard-Sortierung ist -applied_at / neueste zuerst)
+            if (page === 1) {
+                await fetchApplications(1)
+            } else {
+                setPage(1)
+            }
         } catch (error) {
             console.error(
                 'Fehler beim Erstellen der Bewerbung:',
@@ -276,16 +297,7 @@ function App() {
                 )
             }
 
-            const updatedApplication: Application =
-                await response.json()
-
-            setApplications((prev) =>
-                prev.map((application) =>
-                    application.id === id
-                        ? updatedApplication
-                        : application
-                )
-            )
+            await fetchApplications(page)
         } catch (error) {
             console.error(
                 'Fehler beim Aktualisieren der Bewerbung:',
@@ -465,10 +477,10 @@ function App() {
         /*
          * Footer
          */
-        const pageCount = doc.getNumberOfPages()
+        const pageCountPdf = doc.getNumberOfPages()
 
-        for (let page = 1; page <= pageCount; page++) {
-            doc.setPage(page)
+        for (let pdfPage = 1; pdfPage <= pageCountPdf; pdfPage++) {
+            doc.setPage(pdfPage)
 
             const pageWidth =
                 doc.internal.pageSize.getWidth()
@@ -490,7 +502,7 @@ function App() {
             doc.setTextColor(161, 161, 170)
 
             doc.text(
-                `Seite ${page} von ${pageCount}`,
+                `Seite ${pdfPage} von ${pageCountPdf}`,
                 14,
                 pageHeight - 9
             )
@@ -811,6 +823,30 @@ function App() {
                         </tbody>
                     </table>
                 </div>
+
+                {!isLoading && !loadError && totalCount > PAGE_SIZE && (
+                    <div className={styles.pagination}>
+                        <button
+                            type="button"
+                            disabled={page <= 1}
+                            onClick={() => setPage((prev) => prev - 1)}
+                        >
+                            ← Zurück
+                        </button>
+
+                        <span>
+                            Seite {page} von {pageCount}
+                        </span>
+
+                        <button
+                            type="button"
+                            disabled={page >= pageCount}
+                            onClick={() => setPage((prev) => prev + 1)}
+                        >
+                            Weiter →
+                        </button>
+                    </div>
+                )}
             </div>
 
             {isModalOpen && (
