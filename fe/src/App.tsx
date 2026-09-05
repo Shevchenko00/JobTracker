@@ -1,44 +1,14 @@
-import { useEffect, useMemo, useState } from 'react'
+import {useEffect, useMemo, useState} from 'react'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 import styles from './App.module.scss'
+import getTodayDateString from "./utils/getTodayDateString.ts";
+import type {Application, ApplicationStatus} from "./types/application.ts";
+import {statusLabels, statusOrder} from "./types/status.ts";
+import {type Ordering, orderingLabels} from "./types/ordering.ts";
 
-type ApplicationStatus = 'pending' | 'accepted' | 'rejected'
-type Ordering = 'applied_at' | '-applied_at' | 'company_name' | '-company_name'
 
-type Application = {
-    id: number
-    company_name: string
-    description: string
-    applied_at: string
-    status: ApplicationStatus
-}
-
-const statusLabels: Record<ApplicationStatus, string> = {
-    pending: 'In Bearbeitung',
-    accepted: 'Einladung',
-    rejected: 'Absage',
-}
-
-const statusOrder: ApplicationStatus[] = ['pending', 'accepted', 'rejected']
-
-const orderingLabels: Record<Ordering, string> = {
-    '-applied_at': 'Neueste zuerst',
-    applied_at: 'Älteste zuerst',
-    company_name: 'Unternehmen A-Z',
-    '-company_name': 'Unternehmen Z-A',
-}
-
-const getTodayDateString = () => {
-    const now = new Date()
-    const year = now.getFullYear()
-    const month = String(now.getMonth() + 1).padStart(2, '0')
-    const day = String(now.getDate()).padStart(2, '0')
-
-    return `${year}-${month}-${day}`
-}
-
-const API_BASE = 'http://localhost:9212/jobs'
+const API_BASE = import.meta.env.VITE_API_URL
 
 function App() {
     const [applications, setApplications] =
@@ -176,7 +146,7 @@ function App() {
                 acc[application.status] += 1
                 return acc
             },
-            { pending: 0, accepted: 0, rejected: 0 } as Record<
+            {pending: 0, accepted: 0, rejected: 0} as Record<
                 ApplicationStatus,
                 number
             >
@@ -713,7 +683,7 @@ function App() {
                             <th>Position / Beschreibung</th>
                             <th>Bewerbungsdatum</th>
                             <th>Status</th>
-                            <th className={styles.actionsHead} />
+                            <th className={styles.actionsHead}/>
                         </tr>
                         </thead>
                         <tbody>
@@ -733,7 +703,7 @@ function App() {
                                     colSpan={5}
                                 >
                                     Bewerbungen konnten nicht geladen werden.
-                                    <br />
+                                    <br/>
                                     Bitte versuchen Sie es erneut.
                                 </td>
                             </tr>
