@@ -2,7 +2,7 @@ from django.db.models import Q
 from apps.jobs.models import JobsApplicationModel
 from apps.jobs.serializers.jobs_applications_serializer import JobsApplicationSerializer
 from rest_framework import generics
-
+from apps.jobs.pagination import ApplicationPagination
 
 class JobsApplicationCreateAPI(generics.CreateAPIView):
     queryset = JobsApplicationModel.objects.all()
@@ -19,7 +19,7 @@ class JobsApplicationListAPI(generics.ListAPIView):
       ?ordering=-applied_at    -> сортировка (applied_at, company_name, status; с "-" для убывания)
     """
     serializer_class = JobsApplicationSerializer
-
+    pagination_class = ApplicationPagination
     ALLOWED_ORDERING = {
         "applied_at", "-applied_at",
         "company_name", "-company_name",
