@@ -5,5 +5,6 @@ export type Application = {
     company_name: string
     description: string
     applied_at: string
+    url: string
     status: ApplicationStatus
 }

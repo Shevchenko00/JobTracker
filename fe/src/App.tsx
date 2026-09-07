@@ -22,7 +22,7 @@ function App() {
     const [editingId, setEditingId] = useState<number | null>(
         null
     )
-
+    const [jobUrl, setJobUrl] = useState('')
     const [company, setCompany] = useState('')
     const [description, setDescription] = useState('')
     const [appliedAt, setAppliedAt] = useState(
@@ -105,7 +105,6 @@ function App() {
     const fetchApplications = async (targetPage: number = page) => {
         setIsLoading(true)
         setLoadError(false)
-
         try {
             const response = await fetch(
                 `${API_BASE}/${buildQueryString(targetPage)}`
@@ -172,6 +171,7 @@ function App() {
     const resetForm = () => {
         setCompany('')
         setDescription('')
+        setJobUrl('')
         setAppliedAt(getTodayDateString())
         setResult('pending')
         setEditingId(null)
@@ -193,6 +193,7 @@ function App() {
         setEditingId(application.id)
         setCompany(application.company_name)
         setDescription(application.description)
+        setJobUrl(application.url)
         setAppliedAt(
             application.applied_at.slice(0, 10)
         )
@@ -237,6 +238,7 @@ function App() {
     const handleCreateApplication = async () => {
         try {
             const response = await fetch(
+                
                 `${API_BASE}/create/`,
                 {
                     method: 'POST',
@@ -245,6 +247,7 @@ function App() {
                     },
                     body: JSON.stringify({
                         company_name: company,
+                        url: jobUrl,
                         description,
                         applied_at: appliedAt,
                         status: result,
@@ -286,6 +289,7 @@ function App() {
                         company_name: company,
                         description,
                         applied_at: appliedAt,
+                        url: jobUrl,
                         status: result,
                     }),
                 }
@@ -693,6 +697,7 @@ function App() {
                         <tr>
                             <th>Unternehmen</th>
                             <th>Position / Beschreibung</th>
+                            <th>Job URL</th>
                             <th>Bewerbungsdatum</th>
                             <th>Status</th>
                             <th className={styles.actionsHead}/>
@@ -742,7 +747,15 @@ function App() {
                                                 application.description
                                             }
                                         </td>
-
+                                        <td className={styles.date}>
+                                            {application.url ? (
+                                                <a href={application.url} target="_blank" rel="noreferrer">
+                                                    Zur Anzeige
+                                                </a>
+                                            ) : (
+                                                '—'
+                                            )}
+                                        </td>
                                         <td
                                             className={
                                                 styles.date
@@ -915,6 +928,19 @@ function App() {
                                     value={description}
                                     onChange={(event) =>
                                         setDescription(event.target.value)
+                                    }
+                                />
+                            </label>
+                            
+                            <label>
+                                Job URL
+
+                                <input
+                                    type="text"
+                                    placeholder="Zum Beispiel https://www.example.com/job"
+                                    value={jobUrl}
+                                    onChange={(event) =>
+                                        setJobUrl(event.target.value)
                                     }
                                 />
                             </label>
