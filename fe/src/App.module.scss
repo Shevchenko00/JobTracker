@@ -742,3 +742,19 @@
     }
   }
 }
+// В App.module.scss добавить в блок .form (или рядом с ним):
+
+.fieldError {
+  margin-top: -2px;
+  color: #dc2626;
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.inputError {
+  border-color: #dc2626 !important;
+
+  &:focus {
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.08) !important;
+  }
+}

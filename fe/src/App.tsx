@@ -11,6 +11,12 @@ import type {PaginatedResponse} from "./types/pagination.ts";
 const API_BASE = import.meta.env.VITE_API_URL
 const PAGE_SIZE = 10
 
+type FormErrors = {
+    company?: string
+    description?: string
+    appliedAt?: string
+}
+
 function App() {
     const [applications, setApplications] =
         useState<Application[]>([])
@@ -30,6 +36,9 @@ function App() {
     )
     const [result, setResult] =
         useState<ApplicationStatus>('pending')
+
+    // --- Form validation ---
+    const [formErrors, setFormErrors] = useState<FormErrors>({})
 
     // --- Filter ---
     const [searchInput, setSearchInput] = useState('')
@@ -175,6 +184,7 @@ function App() {
         setAppliedAt(getTodayDateString())
         setResult('pending')
         setEditingId(null)
+        setFormErrors({})
     }
 
     const handleCloseModal = () => {
@@ -198,6 +208,7 @@ function App() {
             application.applied_at.slice(0, 10)
         )
         setResult(application.status)
+        setFormErrors({})
         setIsModalOpen(true)
     }
 
@@ -238,7 +249,6 @@ function App() {
     const handleCreateApplication = async () => {
         try {
             const response = await fetch(
-                
                 `${API_BASE}/create/`,
                 {
                     method: 'POST',
@@ -310,12 +320,28 @@ function App() {
         }
     }
 
+    const validateForm = () => {
+        const errors: FormErrors = {}
+
+        if (!company.trim()) {
+            errors.company = 'Bitte geben Sie ein Unternehmen an'
+        }
+
+        if (!description.trim()) {
+            errors.description = 'Bitte geben Sie eine Position/Beschreibung an'
+        }
+
+        if (!appliedAt) {
+            errors.appliedAt = 'Bitte wählen Sie ein Bewerbungsdatum'
+        }
+
+        setFormErrors(errors)
+
+        return Object.keys(errors).length === 0
+    }
+
     const handleSubmit = async () => {
-        if (
-            !company.trim() ||
-            !description.trim() ||
-            !appliedAt
-        ) {
+        if (!validateForm()) {
             return
         }
 
@@ -708,7 +734,7 @@ function App() {
                             <tr>
                                 <td
                                     className={styles.empty}
-                                    colSpan={5}
+                                    colSpan={6}
                                 >
                                     Bewerbungen werden geladen...
                                 </td>
@@ -717,7 +743,7 @@ function App() {
                             <tr>
                                 <td
                                     className={styles.empty}
-                                    colSpan={5}
+                                    colSpan={6}
                                 >
                                     Bewerbungen konnten nicht geladen werden.
                                     <br/>
@@ -747,6 +773,7 @@ function App() {
                                                 application.description
                                             }
                                         </td>
+
                                         <td className={styles.date}>
                                             {application.url ? (
                                                 <a href={application.url} target="_blank" rel="noreferrer">
@@ -756,6 +783,7 @@ function App() {
                                                 '—'
                                             )}
                                         </td>
+
                                         <td
                                             className={
                                                 styles.date
@@ -825,7 +853,7 @@ function App() {
                             <tr>
                                 <td
                                     className={styles.empty}
-                                    colSpan={5}
+                                    colSpan={6}
                                 >
                                     {hasActiveFilters
                                         ? 'Für die gewählten Filter wurde nichts gefunden'
@@ -905,33 +933,70 @@ function App() {
                                 event.preventDefault()
                                 handleSubmit()
                             }}
+                            noValidate
                         >
                             <label>
-                                Unternehmen
+                                Unternehmen *
 
                                 <input
                                     type="text"
                                     placeholder="Zum Beispiel Google"
                                     value={company}
-                                    onChange={(event) =>
-                                        setCompany(event.target.value)
+                                    className={
+                                        formErrors.company
+                                            ? styles.inputError
+                                            : ''
                                     }
+                                    onChange={(event) => {
+                                        setCompany(event.target.value)
+
+                                        if (formErrors.company) {
+                                            setFormErrors((prev) => ({
+                                                ...prev,
+                                                company: undefined,
+                                            }))
+                                        }
+                                    }}
                                 />
+
+                                {formErrors.company && (
+                                    <span className={styles.fieldError}>
+                                        {formErrors.company}
+                                    </span>
+                                )}
                             </label>
 
                             <label>
-                                Position / Beschreibung
+                                Position / Beschreibung *
 
                                 <input
                                     type="text"
                                     placeholder="Zum Beispiel Frontend Developer"
                                     value={description}
-                                    onChange={(event) =>
-                                        setDescription(event.target.value)
+                                    className={
+                                        formErrors.description
+                                            ? styles.inputError
+                                            : ''
                                     }
+                                    onChange={(event) => {
+                                        setDescription(event.target.value)
+
+                                        if (formErrors.description) {
+                                            setFormErrors((prev) => ({
+                                                ...prev,
+                                                description: undefined,
+                                            }))
+                                        }
+                                    }}
                                 />
+
+                                {formErrors.description && (
+                                    <span className={styles.fieldError}>
+                                        {formErrors.description}
+                                    </span>
+                                )}
                             </label>
-                            
+
                             <label>
                                 Job URL
 
@@ -946,19 +1011,37 @@ function App() {
                             </label>
 
                             <label>
-                                Bewerbungsdatum
+                                Bewerbungsdatum *
 
                                 <input
                                     type="date"
                                     value={appliedAt}
-                                    onChange={(event) =>
-                                        setAppliedAt(event.target.value)
+                                    className={
+                                        formErrors.appliedAt
+                                            ? styles.inputError
+                                            : ''
                                     }
+                                    onChange={(event) => {
+                                        setAppliedAt(event.target.value)
+
+                                        if (formErrors.appliedAt) {
+                                            setFormErrors((prev) => ({
+                                                ...prev,
+                                                appliedAt: undefined,
+                                            }))
+                                        }
+                                    }}
                                 />
+
+                                {formErrors.appliedAt && (
+                                    <span className={styles.fieldError}>
+                                        {formErrors.appliedAt}
+                                    </span>
+                                )}
                             </label>
 
                             <label>
-                                Status
+                                Status *
 
                                 <select
                                     value={result}
