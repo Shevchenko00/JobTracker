@@ -66,6 +66,7 @@ function App() {
             company_name: form.values.company,
             description: form.values.description,
             url: form.values.jobUrl,
+            notes: form.values.notes,
             applied_at: form.values.appliedAt,
             status: form.values.status,
         }

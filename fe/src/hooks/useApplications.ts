@@ -9,6 +9,7 @@ const PAGE_SIZE = 10
 export interface ApplicationPayload {
     company_name: string
     description: string
+    notes: string
     url: string
     applied_at: string
     status: ApplicationStatus

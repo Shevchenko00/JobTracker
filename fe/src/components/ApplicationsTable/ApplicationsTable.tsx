@@ -27,6 +27,7 @@ function ApplicationsTable({
                     <th>Unternehmen</th>
                     <th>Position / Beschreibung</th>
                     <th>Job URL</th>
+                    <th>Notizen</th>
                     <th>Bewerbungsdatum</th>
                     <th>Status</th>
                     <th className={styles.actionsHead}/>
@@ -35,13 +36,13 @@ function ApplicationsTable({
                 <tbody>
                 {isLoading ? (
                     <tr>
-                        <td className={styles.empty} colSpan={6}>
+                        <td className={styles.empty} colSpan={7}>
                             Bewerbungen werden geladen...
                         </td>
                     </tr>
                 ) : loadError ? (
                     <tr>
-                        <td className={styles.empty} colSpan={6}>
+                        <td className={styles.empty} colSpan={7}>
                             Bewerbungen konnten nicht geladen werden.
                             <br/>
                             Bitte versuchen Sie es erneut.
@@ -71,9 +72,15 @@ function ApplicationsTable({
                             </td>
 
                             <td className={styles.date}>
-                                {new Date(
-                                    application.applied_at
-                                ).toLocaleDateString('de-DE')}
+                                {application.notes || '—'}
+                            </td>
+
+                            <td className={styles.date}>
+                                {application.applied_at
+                                    ? new Date(
+                                          application.applied_at
+                                      ).toLocaleDateString('de-DE')
+                                    : '—'}
                             </td>
 
                             <td>
@@ -116,7 +123,7 @@ function ApplicationsTable({
                     ))
                 ) : (
                     <tr>
-                        <td className={styles.empty} colSpan={6}>
+                        <td className={styles.empty} colSpan={7}>
                             {hasActiveFilters
                                 ? 'Für die gewählten Filter wurde nichts gefunden'
                                 : 'Noch keine Bewerbungen vorhanden'}
@@ -129,4 +136,4 @@ function ApplicationsTable({
     )
 }
 
-export default ApplicationsTable;
+export default ApplicationsTable

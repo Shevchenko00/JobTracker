@@ -1,7 +1,7 @@
 import type {FormEvent} from 'react'
 import styles from '../../App.module.scss'
 import type {ApplicationStatus} from '../../types/application.ts'
-import type {useApplicationForm} from '../../hooks/useApplicationForm.ts'
+import type {useApplicationForm} from '../../hooks/useApplicationsForm.ts'
 
 interface ApplicationModalProps {
     isOpen: boolean
@@ -122,6 +122,19 @@ function ApplicationModal({
                             value={values.jobUrl}
                             onChange={(event) =>
                                 setField('jobUrl', event.target.value)
+                            }
+                        />
+                    </label>
+                    
+                    <label>
+                        Notizen
+
+                        <input
+                            type="text"
+                            placeholder="Zum Beispiel..."
+                            value={values.notes}
+                            onChange={(event) =>
+                                setField('notes', event.target.value)
                             }
                         />
                     </label>

@@ -5,6 +5,7 @@ import type {Application, ApplicationStatus} from '../types/application.ts'
 export interface ApplicationFormValues {
     company: string
     description: string
+    notes: string
     jobUrl: string
     appliedAt: string
     status: ApplicationStatus
@@ -19,6 +20,7 @@ export interface ApplicationFormErrors {
 const getInitialValues = (): ApplicationFormValues => ({
     company: '',
     description: '',
+    notes: '',
     jobUrl: '',
     appliedAt: getTodayDateString(),
     status: 'pending',
@@ -57,6 +59,7 @@ export function useApplicationForm() {
             company: application.company_name,
             description: application.description,
             jobUrl: application.url,
+            notes: application.notes || '',
             appliedAt: application.applied_at.slice(0, 10),
             status: application.status,
         })

@@ -4,6 +4,7 @@ export type Application = {
     id: number
     company_name: string
     description: string
+    notes: string
     applied_at: string
     url: string
     status: ApplicationStatus
