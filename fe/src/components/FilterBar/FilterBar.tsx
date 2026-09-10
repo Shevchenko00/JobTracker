@@ -1,6 +1,8 @@
+import {useTranslation} from 'react-i18next'
 import styles from '../../App.module.scss'
-import {statusLabels, statusOrder} from '../../types/status.ts'
-import {orderingLabels} from '../../types/ordering.ts'
+import {useStatusLabels} from '../../hooks/useStatusLabel.ts'
+import {useOrderingLabels, orderingValues} from '../../hooks/useOrderingLabels.ts'
+import {statusOrder} from '../../types/status.ts'
 import type {ApplicationStatus} from '../../types/application.ts'
 import type {Ordering} from '../../types/ordering.ts'
 
@@ -44,6 +46,10 @@ function FiltersBar({
     ordering,
     onOrderingChange,
 }: FiltersBarProps) {
+    const {t} = useTranslation()
+    const statusLabels = useStatusLabels()
+    const orderingLabels = useOrderingLabels()
+
     return (
         <>
             <section className={styles.filtersBar}>
@@ -52,7 +58,7 @@ function FiltersBar({
 
                     <input
                         type="text"
-                        placeholder="Suche nach Unternehmen oder Position..."
+                        placeholder={t('filters.searchPlaceholder')}
                         value={searchInput}
                         onChange={(event) =>
                             onSearchInputChange(event.target.value)
@@ -64,7 +70,7 @@ function FiltersBar({
                             type="button"
                             className={styles.clearSearch}
                             onClick={() => onSearchInputChange('')}
-                            aria-label="Suche löschen"
+                            aria-label={t('filters.clearSearch')}
                         >
                             ×
                         </button>
@@ -96,7 +102,7 @@ function FiltersBar({
                     className={styles.toggleFiltersButton}
                     onClick={onToggleFiltersOpen}
                 >
-                    Datum & Sortierung {isFiltersOpen ? '▲' : '▼'}
+                    {t('filters.toggle')} {isFiltersOpen ? '▲' : '▼'}
                 </button>
 
                 {hasActiveFilters && (
@@ -105,7 +111,7 @@ function FiltersBar({
                         className={styles.resetFiltersButton}
                         onClick={onResetFilters}
                     >
-                        Filter zurücksetzen
+                        {t('filters.reset')}
                     </button>
                 )}
             </section>
@@ -113,7 +119,7 @@ function FiltersBar({
             {isFiltersOpen && (
                 <section className={styles.filtersExpanded}>
                     <label>
-                        Datum von
+                        {t('filters.dateFrom')}
 
                         <input
                             type="date"
@@ -125,7 +131,7 @@ function FiltersBar({
                     </label>
 
                     <label>
-                        Datum bis
+                        {t('filters.dateTo')}
 
                         <input
                             type="date"
@@ -137,7 +143,7 @@ function FiltersBar({
                     </label>
 
                     <label>
-                        Sortierung
+                        {t('filters.sorting')}
 
                         <select
                             value={ordering}
@@ -147,13 +153,11 @@ function FiltersBar({
                                 )
                             }
                         >
-                            {Object.entries(orderingLabels).map(
-                                ([value, label]) => (
-                                    <option key={value} value={value}>
-                                        {label}
-                                    </option>
-                                )
-                            )}
+                            {orderingValues.map((value) => (
+                                <option key={value} value={value}>
+                                    {orderingLabels[value]}
+                                </option>
+                            ))}
                         </select>
                     </label>
                 </section>

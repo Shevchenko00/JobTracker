@@ -1,12 +1,13 @@
 import {useState} from 'react'
+import {useTranslation} from 'react-i18next'
 import getTodayDateString from '../utils/getTodayDateString.ts'
 import type {Application, ApplicationStatus} from '../types/application.ts'
 
 export interface ApplicationFormValues {
     company: string
     description: string
-    notes: string
     jobUrl: string
+    notes: string
     appliedAt: string
     status: ApplicationStatus
 }
@@ -20,13 +21,15 @@ export interface ApplicationFormErrors {
 const getInitialValues = (): ApplicationFormValues => ({
     company: '',
     description: '',
-    notes: '',
     jobUrl: '',
+    notes: '',
     appliedAt: getTodayDateString(),
     status: 'pending',
 })
 
 export function useApplicationForm() {
+    const {t} = useTranslation()
+
     const [editingId, setEditingId] = useState<number | null>(null)
     const [values, setValues] = useState<ApplicationFormValues>(
         getInitialValues()
@@ -59,8 +62,10 @@ export function useApplicationForm() {
             company: application.company_name,
             description: application.description,
             jobUrl: application.url,
-            notes: application.notes || '',
-            appliedAt: application.applied_at.slice(0, 10),
+            notes: application.notes ?? '',
+            appliedAt: application.applied_at
+                ? application.applied_at.slice(0, 10)
+                : getTodayDateString(),
             status: application.status,
         })
         setErrors({})
@@ -70,16 +75,15 @@ export function useApplicationForm() {
         const nextErrors: ApplicationFormErrors = {}
 
         if (!values.company.trim()) {
-            nextErrors.company = 'Bitte geben Sie ein Unternehmen an'
+            nextErrors.company = t('form.companyError')
         }
 
         if (!values.description.trim()) {
-            nextErrors.description =
-                'Bitte geben Sie eine Position/Beschreibung an'
+            nextErrors.description = t('form.descriptionError')
         }
 
         if (!values.appliedAt) {
-            nextErrors.appliedAt = 'Bitte wählen Sie ein Bewerbungsdatum'
+            nextErrors.appliedAt = t('form.appliedAtError')
         }
 
         setErrors(nextErrors)

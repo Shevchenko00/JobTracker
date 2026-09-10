@@ -1,7 +1,8 @@
 import type {FormEvent} from 'react'
+import {useTranslation} from 'react-i18next'
 import styles from '../../App.module.scss'
 import type {ApplicationStatus} from '../../types/application.ts'
-import type {useApplicationForm} from '../../hooks/useApplicationsForm.ts'
+import type {useApplicationForm} from '../../hooks/useApplicationForm.ts'
 
 interface ApplicationModalProps {
     isOpen: boolean
@@ -16,6 +17,8 @@ function ApplicationModal({
     onClose,
     onSubmit,
 }: ApplicationModalProps) {
+    const {t} = useTranslation()
+
     if (!isOpen) {
         return null
     }
@@ -42,22 +45,22 @@ function ApplicationModal({
                     <div>
                         <h2>
                             {isEditing
-                                ? 'Bewerbung bearbeiten'
-                                : 'Bewerbung hinzufügen'}
+                                ? t('form.editTitle')
+                                : t('form.createTitle')}
                         </h2>
 
                         <p>
                             {isEditing
-                                ? 'Ändern Sie die Angaben zu Ihrer Bewerbung'
-                                : 'Tragen Sie die Angaben zu Ihrer Bewerbung ein'}
+                                ? t('form.editSubtitle')
+                                : t('form.createSubtitle')}
                         </p>
                     </div>
 
                     <button
                         className={styles.closeButton}
                         onClick={onClose}
-                        aria-label="Schließen"
-                        title="Schließen"
+                        aria-label={t('actions.close')}
+                        title={t('actions.close')}
                         type="button"
                     >
                         ×
@@ -70,11 +73,11 @@ function ApplicationModal({
                     noValidate
                 >
                     <label>
-                        Unternehmen *
+                        {t('form.company')} *
 
                         <input
                             type="text"
-                            placeholder="Zum Beispiel Google"
+                            placeholder={t('form.companyPlaceholder')}
                             value={values.company}
                             className={
                                 errors.company ? styles.inputError : ''
@@ -92,11 +95,11 @@ function ApplicationModal({
                     </label>
 
                     <label>
-                        Position / Beschreibung *
+                        {t('form.description')} *
 
                         <input
                             type="text"
-                            placeholder="Zum Beispiel Frontend Developer"
+                            placeholder={t('form.descriptionPlaceholder')}
                             value={values.description}
                             className={
                                 errors.description ? styles.inputError : ''
@@ -114,24 +117,24 @@ function ApplicationModal({
                     </label>
 
                     <label>
-                        Job URL
+                        {t('form.jobUrl')}
 
                         <input
                             type="text"
-                            placeholder="Zum Beispiel https://www.example.com/job"
+                            placeholder={t('form.jobUrlPlaceholder')}
                             value={values.jobUrl}
                             onChange={(event) =>
                                 setField('jobUrl', event.target.value)
                             }
                         />
                     </label>
-                    
+
                     <label>
-                        Notizen
+                        {t('form.notes')}
 
                         <input
                             type="text"
-                            placeholder="Zum Beispiel..."
+                            placeholder={t('form.notesPlaceholder')}
                             value={values.notes}
                             onChange={(event) =>
                                 setField('notes', event.target.value)
@@ -140,7 +143,7 @@ function ApplicationModal({
                     </label>
 
                     <label>
-                        Bewerbungsdatum *
+                        {t('form.appliedAt')} *
 
                         <input
                             type="date"
@@ -161,7 +164,7 @@ function ApplicationModal({
                     </label>
 
                     <label>
-                        Status *
+                        {t('form.status')} *
 
                         <select
                             value={values.status}
@@ -172,16 +175,22 @@ function ApplicationModal({
                                 )
                             }
                         >
-                            <option value="pending">In Bearbeitung</option>
-                            <option value="accepted">Einladung</option>
-                            <option value="rejected">Absage</option>
+                            <option value="pending">
+                                {t('status.pending')}
+                            </option>
+                            <option value="accepted">
+                                {t('status.accepted')}
+                            </option>
+                            <option value="rejected">
+                                {t('status.rejected')}
+                            </option>
                         </select>
                     </label>
 
                     <button type="submit" className={styles.submitButton}>
                         {isEditing
-                            ? 'Änderungen speichern'
-                            : 'Bewerbung erstellen'}
+                            ? t('form.submitEdit')
+                            : t('form.submitCreate')}
                     </button>
                 </form>
             </div>

@@ -1,0 +1,91 @@
+{
+  "app": {
+    "title": "Мої заявки",
+    "subtitle": "Огляд моїх заявок на роботу"
+  },
+  "actions": {
+    "exportPdf": "Експортувати PDF",
+    "addApplication": "Додати заявку",
+    "edit": "Редагувати заявку",
+    "delete": "Видалити заявку",
+    "close": "Закрити"
+  },
+  "table": {
+    "company": "Компанія",
+    "position": "Посада / Опис",
+    "jobUrl": "Посилання на вакансію",
+    "notes": "Нотатки",
+    "appliedAt": "Дата подання",
+    "status": "Статус",
+    "viewJob": "Переглянути",
+    "loading": "Завантаження заявок...",
+    "loadError": "Не вдалося завантажити заявки.",
+    "loadErrorRetry": "Будь ласка, спробуйте ще раз.",
+    "emptyFiltered": "За обраними фільтрами нічого не знайдено",
+    "emptyDefault": "Заявок поки немає"
+  },
+  "status": {
+    "pending": "На розгляді",
+    "accepted": "Запрошення",
+    "rejected": "Відмова"
+  },
+  "ordering": {
+    "-applied_at": "Спочатку нові",
+    "applied_at": "Спочатку старі",
+    "-company_name": "Компанія Я-А",
+    "company_name": "Компанія А-Я"
+  },
+  "filters": {
+    "searchPlaceholder": "Пошук за компанією або посадою...",
+    "clearSearch": "Очистити пошук",
+    "toggle": "Дата та сортування",
+    "reset": "Скинути фільтри",
+    "dateFrom": "Дата від",
+    "dateTo": "Дата до",
+    "sorting": "Сортування"
+  },
+  "form": {
+    "createTitle": "Додати заявку",
+    "createSubtitle": "Вкажіть дані вашої заявки",
+    "editTitle": "Редагувати заявку",
+    "editSubtitle": "Змініть дані вашої заявки",
+    "company": "Компанія",
+    "companyPlaceholder": "Наприклад, Google",
+    "companyError": "Будь ласка, вкажіть компанію",
+    "description": "Посада / Опис",
+    "descriptionPlaceholder": "Наприклад, Frontend Developer",
+    "descriptionError": "Будь ласка, вкажіть посаду/опис",
+    "jobUrl": "Посилання на вакансію",
+    "jobUrlPlaceholder": "Наприклад, https://www.example.com/job",
+    "notes": "Нотатки",
+    "notesPlaceholder": "Додаткові нотатки...",
+    "appliedAt": "Дата подання",
+    "appliedAtError": "Будь ласка, оберіть дату подання",
+    "status": "Статус",
+    "submitCreate": "Створити заявку",
+    "submitEdit": "Зберегти зміни"
+  },
+  "pagination": {
+    "prev": "← Назад",
+    "next": "Далі →",
+    "pageOf": "Сторінка {{page}} з {{pageCount}}"
+  },
+  "pdf": {
+    "title": "Мої заявки",
+    "subtitle": "Огляд моїх заявок на роботу",
+    "total": "Всього",
+    "pending": "На розгляді",
+    "accepted": "Запрошення",
+    "rejected": "Відмови",
+    "headers": {
+      "company": "Компанія",
+      "position": "Посада / Опис",
+      "date": "Дата",
+      "status": "Статус"
+    },
+    "pageOf": "Сторінка {{page}} з {{pageCount}}",
+    "createdOn": "Створено {{date}}",
+    "filename": "moyi-zayavky.pdf",
+    "locale": "uk-UA"
+  }
+}

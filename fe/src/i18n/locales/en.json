@@ -1,0 +1,91 @@
+{
+  "app": {
+    "title": "My Applications",
+    "subtitle": "Overview of my job applications"
+  },
+  "actions": {
+    "exportPdf": "Export PDF",
+    "addApplication": "Add application",
+    "edit": "Edit application",
+    "delete": "Delete application",
+    "close": "Close"
+  },
+  "table": {
+    "company": "Company",
+    "position": "Position / Description",
+    "jobUrl": "Job URL",
+    "notes": "Notes",
+    "appliedAt": "Applied on",
+    "status": "Status",
+    "viewJob": "View listing",
+    "loading": "Loading applications...",
+    "loadError": "Applications could not be loaded.",
+    "loadErrorRetry": "Please try again.",
+    "emptyFiltered": "No applications match the selected filters",
+    "emptyDefault": "No applications yet"
+  },
+  "status": {
+    "pending": "In progress",
+    "accepted": "Interview",
+    "rejected": "Rejected"
+  },
+  "ordering": {
+    "-applied_at": "Newest first",
+    "applied_at": "Oldest first",
+    "-company_name": "Company Z-A",
+    "company_name": "Company A-Z"
+  },
+  "filters": {
+    "searchPlaceholder": "Search by company or position...",
+    "clearSearch": "Clear search",
+    "toggle": "Date & sorting",
+    "reset": "Reset filters",
+    "dateFrom": "Date from",
+    "dateTo": "Date to",
+    "sorting": "Sort by"
+  },
+  "form": {
+    "createTitle": "Add application",
+    "createSubtitle": "Enter the details of your application",
+    "editTitle": "Edit application",
+    "editSubtitle": "Change the details of your application",
+    "company": "Company",
+    "companyPlaceholder": "e.g. Google",
+    "companyError": "Please enter a company",
+    "description": "Position / Description",
+    "descriptionPlaceholder": "e.g. Frontend Developer",
+    "descriptionError": "Please enter a position/description",
+    "jobUrl": "Job URL",
+    "jobUrlPlaceholder": "e.g. https://www.example.com/job",
+    "notes": "Notes",
+    "notesPlaceholder": "Additional notes...",
+    "appliedAt": "Applied on",
+    "appliedAtError": "Please select an application date",
+    "status": "Status",
+    "submitCreate": "Create application",
+    "submitEdit": "Save changes"
+  },
+  "pagination": {
+    "prev": "← Back",
+    "next": "Next →",
+    "pageOf": "Page {{page}} of {{pageCount}}"
+  },
+  "pdf": {
+    "title": "My Applications",
+    "subtitle": "Overview of my job applications",
+    "total": "Total",
+    "pending": "Pending",
+    "accepted": "Interviews",
+    "rejected": "Rejected",
+    "headers": {
+      "company": "Company",
+      "position": "Position / Description",
+      "date": "Date",
+      "status": "Status"
+    },
+    "pageOf": "Page {{page}} of {{pageCount}}",
+    "createdOn": "Created on {{date}}",
+    "filename": "my-applications.pdf",
+    "locale": "en-US"
+  }
+}

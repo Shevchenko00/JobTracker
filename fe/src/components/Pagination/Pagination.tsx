@@ -1,3 +1,4 @@
+import {useTranslation} from 'react-i18next'
 import styles from '../../App.module.scss'
 
 interface PaginationProps {
@@ -7,6 +8,8 @@ interface PaginationProps {
 }
 
 function Pagination({page, pageCount, onPageChange}: PaginationProps) {
+    const {t} = useTranslation()
+
     return (
         <div className={styles.pagination}>
             <button
@@ -14,11 +17,11 @@ function Pagination({page, pageCount, onPageChange}: PaginationProps) {
                 disabled={page <= 1}
                 onClick={() => onPageChange(page - 1)}
             >
-                ← Zurück
+                {t('pagination.prev')}
             </button>
 
             <span>
-                Seite {page} von {pageCount}
+                {t('pagination.pageOf', {page, pageCount})}
             </span>
 
             <button
@@ -26,7 +29,7 @@ function Pagination({page, pageCount, onPageChange}: PaginationProps) {
                 disabled={page >= pageCount}
                 onClick={() => onPageChange(page + 1)}
             >
-                Weiter →
+                {t('pagination.next')}
             </button>
         </div>
     )

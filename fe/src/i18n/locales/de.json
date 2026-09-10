@@ -1,0 +1,91 @@
+{
+  "app": {
+    "title": "Meine Bewerbungen",
+    "subtitle": "Übersicht meiner Bewerbungen"
+  },
+  "actions": {
+    "exportPdf": "PDF exportieren",
+    "addApplication": "Bewerbung hinzufügen",
+    "edit": "Bewerbung bearbeiten",
+    "delete": "Bewerbung löschen",
+    "close": "Schließen"
+  },
+  "table": {
+    "company": "Unternehmen",
+    "position": "Position / Beschreibung",
+    "jobUrl": "Job URL",
+    "notes": "Notizen",
+    "appliedAt": "Bewerbungsdatum",
+    "status": "Status",
+    "viewJob": "Zur Anzeige",
+    "loading": "Bewerbungen werden geladen...",
+    "loadError": "Bewerbungen konnten nicht geladen werden.",
+    "loadErrorRetry": "Bitte versuchen Sie es erneut.",
+    "emptyFiltered": "Für die gewählten Filter wurde nichts gefunden",
+    "emptyDefault": "Noch keine Bewerbungen vorhanden"
+  },
+  "status": {
+    "pending": "In Bearbeitung",
+    "accepted": "Einladung",
+    "rejected": "Absage"
+  },
+  "ordering": {
+    "-applied_at": "Neueste zuerst",
+    "applied_at": "Älteste zuerst",
+    "-company_name": "Unternehmen Z-A",
+    "company_name": "Unternehmen A-Z"
+  },
+  "filters": {
+    "searchPlaceholder": "Suche nach Unternehmen oder Position...",
+    "clearSearch": "Suche löschen",
+    "toggle": "Datum & Sortierung",
+    "reset": "Filter zurücksetzen",
+    "dateFrom": "Datum von",
+    "dateTo": "Datum bis",
+    "sorting": "Sortierung"
+  },
+  "form": {
+    "createTitle": "Bewerbung hinzufügen",
+    "createSubtitle": "Tragen Sie die Angaben zu Ihrer Bewerbung ein",
+    "editTitle": "Bewerbung bearbeiten",
+    "editSubtitle": "Ändern Sie die Angaben zu Ihrer Bewerbung",
+    "company": "Unternehmen",
+    "companyPlaceholder": "Zum Beispiel Google",
+    "companyError": "Bitte geben Sie ein Unternehmen an",
+    "description": "Position / Beschreibung",
+    "descriptionPlaceholder": "Zum Beispiel Frontend Developer",
+    "descriptionError": "Bitte geben Sie eine Position/Beschreibung an",
+    "jobUrl": "Job URL",
+    "jobUrlPlaceholder": "Zum Beispiel https://www.example.com/job",
+    "notes": "Notizen",
+    "notesPlaceholder": "Zusätzliche Notizen...",
+    "appliedAt": "Bewerbungsdatum",
+    "appliedAtError": "Bitte wählen Sie ein Bewerbungsdatum",
+    "status": "Status",
+    "submitCreate": "Bewerbung erstellen",
+    "submitEdit": "Änderungen speichern"
+  },
+  "pagination": {
+    "prev": "← Zurück",
+    "next": "Weiter →",
+    "pageOf": "Seite {{page}} von {{pageCount}}"
+  },
+  "pdf": {
+    "title": "Meine Bewerbungen",
+    "subtitle": "Übersicht meiner Bewerbungen",
+    "total": "Gesamt",
+    "pending": "Offen",
+    "accepted": "Einladungen",
+    "rejected": "Absagen",
+    "headers": {
+      "company": "Unternehmen",
+      "position": "Position / Beschreibung",
+      "date": "Datum",
+      "status": "Status"
+    },
+    "pageOf": "Seite {{page}} von {{pageCount}}",
+    "createdOn": "Erstellt am {{date}}",
+    "filename": "meine-bewerbungen.pdf",
+    "locale": "de-DE"
+  }
+}

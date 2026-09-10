@@ -1,6 +1,7 @@
+import {useTranslation} from 'react-i18next'
 import styles from '../../App.module.scss'
 import type {Application} from '../../types/application.ts'
-import {statusLabels} from '../../types/status.ts'
+import {useStatusLabels} from '../../hooks/useStatusLabel.ts'
 
 interface ApplicationsTableProps {
     applications: Application[]
@@ -21,17 +22,20 @@ function ApplicationsTable({
     onEdit,
     onDelete,
 }: ApplicationsTableProps) {
+    const {t, i18n} = useTranslation()
+    const statusLabels = useStatusLabels()
+
     return (
         <div className={styles.tableWrapper}>
             <table className={styles.table}>
                 <thead>
                 <tr>
-                    <th>Unternehmen</th>
-                    <th>Position / Beschreibung</th>
-                    <th>Job URL</th>
-                    <th>Notizen</th>
-                    <th>Bewerbungsdatum</th>
-                    <th>Status</th>
+                    <th>{t('table.company')}</th>
+                    <th>{t('table.position')}</th>
+                    <th>{t('table.jobUrl')}</th>
+                    <th>{t('table.notes')}</th>
+                    <th>{t('table.appliedAt')}</th>
+                    <th>{t('table.status')}</th>
                     <th className={styles.actionsHead}/>
                 </tr>
                 </thead>
@@ -66,9 +70,9 @@ function ApplicationsTable({
                 ) : loadError ? (
                     <tr>
                         <td className={styles.empty} colSpan={7}>
-                            Bewerbungen konnten nicht geladen werden.
+                            {t('table.loadError')}
                             <br/>
-                            Bitte versuchen Sie es erneut.
+                            {t('table.loadErrorRetry')}
                         </td>
                     </tr>
                 ) : applications.length !== 0 ? (
@@ -87,7 +91,7 @@ function ApplicationsTable({
                                         target="_blank"
                                         rel="noreferrer"
                                     >
-                                        Zur Anzeige
+                                        {t('table.viewJob')}
                                     </a>
                                 ) : (
                                     '—'
@@ -102,7 +106,7 @@ function ApplicationsTable({
                                 {application.applied_at
                                     ? new Date(
                                           application.applied_at
-                                      ).toLocaleDateString('de-DE')
+                                      ).toLocaleDateString(i18n.language)
                                     : '—'}
                             </td>
 
@@ -125,8 +129,8 @@ function ApplicationsTable({
                                 <button
                                     className={styles.editButton}
                                     onClick={() => onEdit(application)}
-                                    aria-label="Bewerbung bearbeiten"
-                                    title="Bewerbung bearbeiten"
+                                    aria-label={t('actions.edit')}
+                                    title={t('actions.edit')}
                                     type="button"
                                 >
                                     ✎
@@ -135,8 +139,8 @@ function ApplicationsTable({
                                 <button
                                     className={styles.deleteButton}
                                     onClick={() => onDelete(application.id)}
-                                    aria-label="Bewerbung löschen"
-                                    title="Bewerbung löschen"
+                                    aria-label={t('actions.delete')}
+                                    title={t('actions.delete')}
                                     type="button"
                                 >
                                     ×
@@ -148,8 +152,8 @@ function ApplicationsTable({
                     <tr>
                         <td className={styles.empty} colSpan={7}>
                             {hasActiveFilters
-                                ? 'Für die gewählten Filter wurde nichts gefunden'
-                                : 'Noch keine Bewerbungen vorhanden'}
+                                ? t('table.emptyFiltered')
+                                : t('table.emptyDefault')}
                         </td>
                     </tr>
                 )}
