@@ -758,3 +758,51 @@
     box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.08) !important;
   }
 }
+
+/* =========================
+   Skeleton loading
+   ========================= */
+
+@keyframes skeletonPulse {
+  0%, 100% {
+    opacity: 0.55;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+.skeleton {
+  display: inline-block;
+  height: 14px;
+  border-radius: 6px;
+  background: #e4e4e7;
+  animation: skeletonPulse 1.4s ease-in-out infinite;
+}
+
+.skeletonCompany {
+  width: 100px;
+  height: 15px;
+}
+
+.skeletonText {
+  width: 140px;
+}
+
+.skeletonShort {
+  width: 70px;
+}
+
+.skeletonPill {
+  width: 80px;
+  height: 22px;
+  border-radius: 999px;
+}
+
+.skeletonIcon {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  margin-right: 4px;
+}

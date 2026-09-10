@@ -11,6 +11,8 @@ interface ApplicationsTableProps {
     onDelete: (id: number) => void
 }
 
+const SKELETON_ROWS = 5
+
 function ApplicationsTable({
     applications,
     isLoading,
@@ -35,11 +37,32 @@ function ApplicationsTable({
                 </thead>
                 <tbody>
                 {isLoading ? (
-                    <tr>
-                        <td className={styles.empty} colSpan={7}>
-                            Bewerbungen werden geladen...
-                        </td>
-                    </tr>
+                    Array.from({length: SKELETON_ROWS}).map((_, index) => (
+                        <tr key={`skeleton-${index}`}>
+                            <td>
+                                <span className={`${styles.skeleton} ${styles.skeletonCompany}`}/>
+                            </td>
+                            <td>
+                                <span className={`${styles.skeleton} ${styles.skeletonText}`}/>
+                            </td>
+                            <td>
+                                <span className={`${styles.skeleton} ${styles.skeletonShort}`}/>
+                            </td>
+                            <td>
+                                <span className={`${styles.skeleton} ${styles.skeletonText}`}/>
+                            </td>
+                            <td>
+                                <span className={`${styles.skeleton} ${styles.skeletonShort}`}/>
+                            </td>
+                            <td>
+                                <span className={`${styles.skeleton} ${styles.skeletonPill}`}/>
+                            </td>
+                            <td className={styles.actions}>
+                                <span className={`${styles.skeleton} ${styles.skeletonIcon}`}/>
+                                <span className={`${styles.skeleton} ${styles.skeletonIcon}`}/>
+                            </td>
+                        </tr>
+                    ))
                 ) : loadError ? (
                     <tr>
                         <td className={styles.empty} colSpan={7}>
