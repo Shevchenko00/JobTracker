@@ -806,3 +806,52 @@
   border-radius: 6px;
   margin-right: 4px;
 }
+
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: #fff;
+  border-radius: 12px;
+  padding: 24px;
+  max-width: 360px;
+  width: 90%;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.modalText {
+  margin: 0 0 20px;
+  font-size: 15px;
+  line-height: 1.4;
+}
+
+.modalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.modalCancel,
+.modalConfirm {
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.modalCancel {
+  background: #f0f0f0;
+}
+
+.modalConfirm {
+  background: #e53935;
+  color: #fff;
+}

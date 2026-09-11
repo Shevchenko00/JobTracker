@@ -8,6 +8,7 @@
     "addApplication": "Add application",
     "edit": "Edit application",
     "delete": "Delete application",
+    "cancel": "Cancel",
     "close": "Close"
   },
   "table": {
@@ -22,7 +23,8 @@
     "loadError": "Applications could not be loaded.",
     "loadErrorRetry": "Please try again.",
     "emptyFiltered": "No applications match the selected filters",
-    "emptyDefault": "No applications yet"
+    "emptyDefault": "No applications yet",
+    "confirmDelete": "Are you sure you want to delete the application at {{company}}? This action cannot be undone."
   },
   "status": {
     "pending": "In progress",
