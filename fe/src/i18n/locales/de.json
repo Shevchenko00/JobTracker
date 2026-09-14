@@ -8,8 +8,9 @@
     "addApplication": "Bewerbung hinzufügen",
     "edit": "Bewerbung bearbeiten",
     "delete": "Bewerbung löschen",
+    "cancel": "Abbrechen",
     "close": "Schließen"
-  },
+},
   "table": {
     "company": "Unternehmen",
     "position": "Position / Beschreibung",
@@ -22,7 +23,8 @@
     "loadError": "Bewerbungen konnten nicht geladen werden.",
     "loadErrorRetry": "Bitte versuchen Sie es erneut.",
     "emptyFiltered": "Für die gewählten Filter wurde nichts gefunden",
-    "emptyDefault": "Noch keine Bewerbungen vorhanden"
+    "emptyDefault": "Noch keine Bewerbungen vorhanden",
+    "confirmDelete": "Möchten Sie die Bewerbung bei {{company}} wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden."
   },
   "status": {
     "pending": "In Bearbeitung",
