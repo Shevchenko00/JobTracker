@@ -11,21 +11,20 @@ import ApplicationsTable from './components/ApplicationsTable/ApplicationsTable.
 import Pagination from './components/Pagination/Pagination.tsx'
 import ApplicationModal from './components/ApplicationsModal/ApplicationsModal.tsx'
 import LanguageSwitcher from './components/LanguageSwitcher/LanguageSwitcher.tsx'
+import ThemeToggle from './components/ThemeToggle/ThemeToggle.tsx'
 import type {Application} from './types/application.ts'
- 
+
 const PAGE_SIZE = 10
-
-
 
 function App() {
     const {t, i18n} = useTranslation()
     const statusLabels = useStatusLabels()
- 
+
     const {
         applications,
         isLoading,
         loadError,
- 
+
         searchInput,
         setSearchInput,
         activeStatuses,
@@ -41,35 +40,35 @@ function App() {
         hasActiveFilters,
         handleResetFilters,
         statusCounts,
- 
+
         page,
         setPage,
         pageCount,
         totalCount,
- 
+
         createApplication,
         updateApplication,
         deleteApplication,
     } = useApplications()
- 
+
     const form = useApplicationForm()
     const [isModalOpen, setIsModalOpen] = useState(false)
- 
+
     const handleOpenCreateModal = () => {
         form.reset()
         setIsModalOpen(true)
     }
- 
+
     const handleOpenEditModal = (application: Application) => {
         form.loadApplication(application)
         setIsModalOpen(true)
     }
- 
+
     const handleCloseModal = () => {
         setIsModalOpen(false)
         form.reset()
     }
- 
+
     const handleFormSubmit = async () => {
         const payload = {
             company_name: form.values.company,
@@ -79,16 +78,16 @@ function App() {
             applied_at: form.values.appliedAt,
             status: form.values.status,
         }
- 
+
         if (form.isEditing && form.editingId !== null) {
             await updateApplication(form.editingId, payload)
         } else {
             await createApplication(payload)
         }
- 
+
         handleCloseModal()
     }
- 
+
     const handleExportPDF = () => {
         exportApplicationsToPDF(applications, {
             title: t('pdf.title'),
@@ -111,7 +110,7 @@ function App() {
             locale: resolvePdfLocale(i18n.language),
         })
     }
- 
+
     return (
         <main className={styles.app}>
             <div className={styles.container}>
@@ -120,15 +119,16 @@ function App() {
                         <h1 className={styles.title}>
                             {t('app.title')}
                         </h1>
- 
+
                         <p className={styles.subtitle}>
                             {t('app.subtitle')}
                         </p>
                     </div>
- 
+
                     <div className={styles.headerActions}>
                         <LanguageSwitcher/>
- 
+                        <ThemeToggle/>
+
                         <button
                             className={styles.exportButton}
                             onClick={handleExportPDF}
@@ -140,7 +140,7 @@ function App() {
                             <span>↓</span>
                             {t('actions.exportPdf')}
                         </button>
- 
+
                         <button
                             className={styles.createButton}
                             onClick={handleOpenCreateModal}
@@ -151,7 +151,7 @@ function App() {
                         </button>
                     </div>
                 </header>
- 
+
                 <FiltersBar
                     searchInput={searchInput}
                     onSearchInputChange={setSearchInput}
@@ -171,7 +171,7 @@ function App() {
                     ordering={ordering}
                     onOrderingChange={setOrdering}
                 />
- 
+
                 <ApplicationsTable
                     applications={applications}
                     isLoading={isLoading}
@@ -180,7 +180,7 @@ function App() {
                     onEdit={handleOpenEditModal}
                     onDelete={deleteApplication}
                 />
- 
+
                 {!isLoading && !loadError && totalCount > PAGE_SIZE && (
                     <Pagination
                         page={page}
@@ -189,7 +189,7 @@ function App() {
                     />
                 )}
             </div>
- 
+
             <ApplicationModal
                 isOpen={isModalOpen}
                 form={form}
@@ -199,6 +199,5 @@ function App() {
         </main>
     )
 }
- 
-export default App
 
+export default App

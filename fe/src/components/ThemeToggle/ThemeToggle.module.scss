@@ -1,0 +1,31 @@
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+
+  font-size: 16px;
+  line-height: 1;
+
+  cursor: pointer;
+  transition:
+          background 0.15s ease,
+          border-color 0.15s ease,
+          transform 0.15s ease;
+
+  &:hover {
+    border-color: var(--color-border-hover);
+    background: var(--color-surface-subtle);
+  }
+
+  &:active {
+    transform: translateY(1px);
+  }
+}
