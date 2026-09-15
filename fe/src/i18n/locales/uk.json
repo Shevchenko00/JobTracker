@@ -8,8 +8,8 @@
     "addApplication": "Додати заявку",
     "edit": "Редагувати заявку",
     "delete": "Видалити заявку",
-    "cancel": "Скасувати",
-    "close": "Закрити"
+    "close": "Закрити",
+    "exportCsv": "Експортувати CSV"
   },
   "table": {
     "company": "Компанія",
@@ -23,8 +23,7 @@
     "loadError": "Не вдалося завантажити заявки.",
     "loadErrorRetry": "Будь ласка, спробуйте ще раз.",
     "emptyFiltered": "За обраними фільтрами нічого не знайдено",
-    "emptyDefault": "Заявок поки немає",
-    "confirmDelete": "Ви впевнені, що хочете видалити заявку до {{company}}? Цю дію не можна скасувати."
+    "emptyDefault": "Заявок поки немає"
   },
   "status": {
     "pending": "На розгляді",
@@ -89,5 +88,12 @@
     "createdOn": "Створено {{date}}",
     "filename": "moyi-zayavky.pdf",
     "locale": "uk-UA"
+  },
+  "theme": {
+    "switchToDark": "Перемкнути на темну тему",
+    "switchToLight": "Перемкнути на світлу тему"
+  },
+  "csv": {
+    "filename": "moyi-zayavky.csv"
   }
 }

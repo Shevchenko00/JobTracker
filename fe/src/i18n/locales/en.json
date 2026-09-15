@@ -8,8 +8,8 @@
     "addApplication": "Add application",
     "edit": "Edit application",
     "delete": "Delete application",
-    "cancel": "Cancel",
-    "close": "Close"
+    "close": "Close",
+    "exportCsv": "Export CSV"
   },
   "table": {
     "company": "Company",
@@ -23,8 +23,7 @@
     "loadError": "Applications could not be loaded.",
     "loadErrorRetry": "Please try again.",
     "emptyFiltered": "No applications match the selected filters",
-    "emptyDefault": "No applications yet",
-    "confirmDelete": "Are you sure you want to delete the application at {{company}}? This action cannot be undone."
+    "emptyDefault": "No applications yet"
   },
   "status": {
     "pending": "In progress",
@@ -89,5 +88,12 @@
     "createdOn": "Created on {{date}}",
     "filename": "my-applications.pdf",
     "locale": "en-US"
+  },
+  "theme": {
+    "switchToDark": "Switch to dark theme",
+    "switchToLight": "Switch to light theme"
+  },
+  "csv": {
+    "filename": "my-applications.csv"
   }
 }

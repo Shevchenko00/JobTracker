@@ -8,9 +8,9 @@
     "addApplication": "Bewerbung hinzufügen",
     "edit": "Bewerbung bearbeiten",
     "delete": "Bewerbung löschen",
-    "cancel": "Abbrechen",
-    "close": "Schließen"
-},
+    "close": "Schließen",
+    "exportCsv": "CSV exportieren"
+  },
   "table": {
     "company": "Unternehmen",
     "position": "Position / Beschreibung",
@@ -23,8 +23,7 @@
     "loadError": "Bewerbungen konnten nicht geladen werden.",
     "loadErrorRetry": "Bitte versuchen Sie es erneut.",
     "emptyFiltered": "Für die gewählten Filter wurde nichts gefunden",
-    "emptyDefault": "Noch keine Bewerbungen vorhanden",
-    "confirmDelete": "Möchten Sie die Bewerbung bei {{company}} wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden."
+    "emptyDefault": "Noch keine Bewerbungen vorhanden"
   },
   "status": {
     "pending": "In Bearbeitung",
@@ -89,5 +88,12 @@
     "createdOn": "Erstellt am {{date}}",
     "filename": "meine-bewerbungen.pdf",
     "locale": "de-DE"
+  },
+  "theme": {
+    "switchToDark": "Zum dunklen Design wechseln",
+    "switchToLight": "Zum hellen Design wechseln"
+  },
+  "csv": {
+    "filename": "meine-bewerbungen.csv"
   }
 }
