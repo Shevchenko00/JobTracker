@@ -7,13 +7,15 @@ import type {useApplicationForm} from '../../hooks/useApplicationForm.ts'
 interface ApplicationModalProps {
     isOpen: boolean
     form: ReturnType<typeof useApplicationForm>
+    error: string | null
     onClose: () => void
-    onSubmit: () => void
+    onSubmit: () => void | Promise<void>
 }
 
 function ApplicationModal({
     isOpen,
     form,
+    error,
     onClose,
     onSubmit,
 }: ApplicationModalProps) {
@@ -23,7 +25,13 @@ function ApplicationModal({
         return null
     }
 
-    const {isEditing, values, errors, setField, validate} = form
+    const {
+        isEditing,
+        values,
+        errors,
+        setField,
+        validate,
+    } = form
 
     const handleSubmit = (event: FormEvent) => {
         event.preventDefault()
@@ -80,10 +88,15 @@ function ApplicationModal({
                             placeholder={t('form.companyPlaceholder')}
                             value={values.company}
                             className={
-                                errors.company ? styles.inputError : ''
+                                errors.company
+                                    ? styles.inputError
+                                    : ''
                             }
                             onChange={(event) =>
-                                setField('company', event.target.value)
+                                setField(
+                                    'company',
+                                    event.target.value
+                                )
                             }
                         />
 
@@ -99,13 +112,20 @@ function ApplicationModal({
 
                         <input
                             type="text"
-                            placeholder={t('form.descriptionPlaceholder')}
+                            placeholder={t(
+                                'form.descriptionPlaceholder'
+                            )}
                             value={values.description}
                             className={
-                                errors.description ? styles.inputError : ''
+                                errors.description
+                                    ? styles.inputError
+                                    : ''
                             }
                             onChange={(event) =>
-                                setField('description', event.target.value)
+                                setField(
+                                    'description',
+                                    event.target.value
+                                )
                             }
                         />
 
@@ -121,10 +141,15 @@ function ApplicationModal({
 
                         <input
                             type="text"
-                            placeholder={t('form.jobUrlPlaceholder')}
+                            placeholder={t(
+                                'form.jobUrlPlaceholder'
+                            )}
                             value={values.jobUrl}
                             onChange={(event) =>
-                                setField('jobUrl', event.target.value)
+                                setField(
+                                    'jobUrl',
+                                    event.target.value
+                                )
                             }
                         />
                     </label>
@@ -134,10 +159,15 @@ function ApplicationModal({
 
                         <input
                             type="text"
-                            placeholder={t('form.notesPlaceholder')}
+                            placeholder={t(
+                                'form.notesPlaceholder'
+                            )}
                             value={values.notes}
                             onChange={(event) =>
-                                setField('notes', event.target.value)
+                                setField(
+                                    'notes',
+                                    event.target.value
+                                )
                             }
                         />
                     </label>
@@ -149,10 +179,15 @@ function ApplicationModal({
                             type="date"
                             value={values.appliedAt}
                             className={
-                                errors.appliedAt ? styles.inputError : ''
+                                errors.appliedAt
+                                    ? styles.inputError
+                                    : ''
                             }
                             onChange={(event) =>
-                                setField('appliedAt', event.target.value)
+                                setField(
+                                    'appliedAt',
+                                    event.target.value
+                                )
                             }
                         />
 
@@ -171,23 +206,38 @@ function ApplicationModal({
                             onChange={(event) =>
                                 setField(
                                     'status',
-                                    event.target.value as ApplicationStatus
+                                    event.target
+                                        .value as ApplicationStatus
                                 )
                             }
                         >
                             <option value="pending">
                                 {t('status.pending')}
                             </option>
+
                             <option value="accepted">
                                 {t('status.accepted')}
                             </option>
+
                             <option value="rejected">
                                 {t('status.rejected')}
                             </option>
                         </select>
                     </label>
 
-                    <button type="submit" className={styles.submitButton}>
+                    {error && (
+                        <div
+                            className={styles.formError}
+                            role="alert"
+                        >
+                            {error}
+                        </div>
+                    )}
+
+                    <button
+                        type="submit"
+                        className={styles.submitButton}
+                    >
                         {isEditing
                             ? t('form.submitEdit')
                             : t('form.submitCreate')}

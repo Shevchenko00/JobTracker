@@ -13,20 +13,19 @@ import ApplicationModal from './components/ApplicationsModal/ApplicationsModal.t
 import LanguageSwitcher from './components/LanguageSwitcher/LanguageSwitcher.tsx'
 import ThemeToggle from './components/ThemeToggle/ThemeToggle.tsx'
 import type {Application} from './types/application.ts'
-import { exportApplicationsToCSV } from './utils/exportAppliactionToCsv.ts'
-
+import {exportApplicationsToCSV} from './utils/exportAppliactionToCsv.ts'
 
 const PAGE_SIZE = 10
- 
+
 function App() {
     const {t, i18n} = useTranslation()
     const statusLabels = useStatusLabels()
- 
+
     const {
         applications,
         isLoading,
         loadError,
- 
+
         searchInput,
         setSearchInput,
         activeStatuses,
@@ -42,36 +41,43 @@ function App() {
         hasActiveFilters,
         handleResetFilters,
         statusCounts,
- 
+
         page,
         setPage,
         pageCount,
         totalCount,
- 
+
         createApplication,
         updateApplication,
         deleteApplication,
     } = useApplications()
- 
+
     const form = useApplicationForm()
+
     const [isModalOpen, setIsModalOpen] = useState(false)
- 
+    const [formError, setFormError] = useState<string | null>(null)
+
     const handleOpenCreateModal = () => {
         form.reset()
+        setFormError(null)
         setIsModalOpen(true)
     }
- 
+
     const handleOpenEditModal = (application: Application) => {
         form.loadApplication(application)
+        setFormError(null)
         setIsModalOpen(true)
     }
- 
+
     const handleCloseModal = () => {
         setIsModalOpen(false)
+        setFormError(null)
         form.reset()
     }
- 
+
     const handleFormSubmit = async () => {
+        setFormError(null)
+
         const payload = {
             company_name: form.values.company,
             description: form.values.description,
@@ -80,16 +86,27 @@ function App() {
             applied_at: form.values.appliedAt,
             status: form.values.status,
         }
- 
-        if (form.isEditing && form.editingId !== null) {
-            await updateApplication(form.editingId, payload)
-        } else {
-            await createApplication(payload)
+
+        try {
+            if (form.isEditing && form.editingId !== null) {
+                await updateApplication(form.editingId, payload)
+            } else {
+                await createApplication(payload)
+            }
+
+            // Закрываем модалку только если запрос прошёл успешно
+            handleCloseModal()
+        } catch (error) {
+            if (error instanceof Error) {
+                setFormError(error.message)
+            } else {
+                setFormError(
+                    'Ein unerwarteter Fehler ist aufgetreten.'
+                )
+            }
         }
- 
-        handleCloseModal()
     }
- 
+
     const handleExportPDF = () => {
         exportApplicationsToPDF(applications, {
             title: t('pdf.title'),
@@ -112,8 +129,7 @@ function App() {
             locale: resolvePdfLocale(i18n.language),
         })
     }
- 
- 
+
     const handleExportCSV = () => {
         exportApplicationsToCSV(applications, {
             headers: {
@@ -129,7 +145,7 @@ function App() {
             filename: t('csv.filename'),
         })
     }
- 
+
     return (
         <main className={styles.app}>
             <div className={styles.container}>
@@ -138,40 +154,42 @@ function App() {
                         <h1 className={styles.title}>
                             {t('app.title')}
                         </h1>
- 
+
                         <p className={styles.subtitle}>
                             {t('app.subtitle')}
                         </p>
                     </div>
- 
+
                     <div className={styles.headerActions}>
                         <LanguageSwitcher/>
                         <ThemeToggle/>
- 
+
                         <button
                             className={styles.exportButton}
                             onClick={handleExportPDF}
                             disabled={
-                                applications.length === 0 || isLoading
+                                applications.length === 0 ||
+                                isLoading
                             }
                             type="button"
                         >
                             <span>↓</span>
                             {t('actions.exportPdf')}
                         </button>
- 
+
                         <button
                             className={styles.exportButton}
                             onClick={handleExportCSV}
                             disabled={
-                                applications.length === 0 || isLoading
+                                applications.length === 0 ||
+                                isLoading
                             }
                             type="button"
                         >
                             <span>↓</span>
                             {t('actions.exportCsv')}
                         </button>
- 
+
                         <button
                             className={styles.createButton}
                             onClick={handleOpenCreateModal}
@@ -182,7 +200,7 @@ function App() {
                         </button>
                     </div>
                 </header>
- 
+
                 <FiltersBar
                     searchInput={searchInput}
                     onSearchInputChange={setSearchInput}
@@ -202,7 +220,7 @@ function App() {
                     ordering={ordering}
                     onOrderingChange={setOrdering}
                 />
- 
+
                 <ApplicationsTable
                     applications={applications}
                     isLoading={isLoading}
@@ -211,24 +229,27 @@ function App() {
                     onEdit={handleOpenEditModal}
                     onDelete={deleteApplication}
                 />
- 
-                {!isLoading && !loadError && totalCount > PAGE_SIZE && (
-                    <Pagination
-                        page={page}
-                        pageCount={pageCount}
-                        onPageChange={setPage}
-                    />
-                )}
+
+                {!isLoading &&
+                    !loadError &&
+                    totalCount > PAGE_SIZE && (
+                        <Pagination
+                            page={page}
+                            pageCount={pageCount}
+                            onPageChange={setPage}
+                        />
+                    )}
             </div>
- 
+
             <ApplicationModal
                 isOpen={isModalOpen}
                 form={form}
+                error={formError}
                 onClose={handleCloseModal}
                 onSubmit={handleFormSubmit}
             />
         </main>
     )
 }
- 
+
 export default App

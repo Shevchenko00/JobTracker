@@ -151,57 +151,48 @@ export function useApplications() {
     }, [applications])
 
     const createApplication = async (payload: ApplicationPayload) => {
-        try {
-            const response = await fetch(`${API_BASE}/create/`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(payload),
-            })
+    const response = await fetch(`${API_BASE}/create/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+    })
 
-            if (!response.ok) {
-                throw new Error(
-                    `Fehler beim Erstellen der Bewerbung: ${response.status}`
-                )
-            }
+    if (!response.ok) {
+        const data = await response.json()
 
-            // Neue Bewerbung erstellt -> zurück auf Seite 1, damit sie sichtbar ist
-            // (Standard-Sortierung ist -applied_at / neueste zuerst)
-            if (page === 1) {
-                await fetchApplications(1)
-            } else {
-                setPage(1)
-            }
-        } catch (error) {
-            console.error('Fehler beim Erstellen der Bewerbung:', error)
-        }
+        throw data
     }
+
+    if (page === 1) {
+        await fetchApplications(1)
+    } else {
+        setPage(1)
+    }
+}
+
 
     const updateApplication = async (
-        id: number,
-        payload: ApplicationPayload
-    ) => {
-        try {
-            const response = await fetch(`${API_BASE}/update/${id}/`, {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(payload),
-            })
+    id: number,
+    payload: ApplicationPayload
+) => {
+    const response = await fetch(`${API_BASE}/update/${id}/`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+    })
 
-            if (!response.ok) {
-                throw new Error(
-                    `Fehler beim Aktualisieren der Bewerbung: ${response.status}`
-                )
-            }
+    if (!response.ok) {
+        const data = await response.json()
 
-            await fetchApplications(page)
-        } catch (error) {
-            console.error('Fehler beim Aktualisieren der Bewerbung:', error)
-        }
+        throw data
     }
+
+    await fetchApplications(page)
+}
 
     const deleteApplication = async (id: number) => {
         try {
