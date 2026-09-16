@@ -1,4 +1,14 @@
+from django.core.exceptions import ValidationError
 from django.db import models
+from django.utils import timezone
+
+
+def validate_not_in_future(value):
+    if value and value > timezone.now().date():
+        raise ValidationError(
+            "Das Bewerbungsdatum darf nicht in der Zukunft liegen.",
+            params={"value": value},
+        )
 
 
 class JobsApplicationModel(models.Model):
@@ -15,7 +25,10 @@ class JobsApplicationModel(models.Model):
         ],
         default="pending",
     )
-    applied_at = models.DateField(blank=True, null=True)
+    applied_at = models.DateField(
+        blank=True, null=True, validators=[validate_not_in_future]
+    )
+
     class Meta:
         db_table = "job_applications"
         verbose_name = "Job Application"
