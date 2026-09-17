@@ -46,6 +46,19 @@ INSTALLED_APPS = [
     'rest_framework',
     "corsheaders",
 ]
+
+CORS_ALLOW_HEADERS = [
+    "accept",
+    "accept-encoding",
+    "authorization",
+    "content-type",
+    "dnt",
+    "origin",
+    "user-agent",
+    "x-csrftoken",
+    "x-requested-with",
+    "accept-language",  
+]
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5172",
@@ -56,6 +69,7 @@ MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -75,6 +89,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'django.template.context_processors.locale',
             ],
         },
     },
@@ -122,8 +137,26 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # Internationalization
 # https://docs.djangoproject.com/en/6.1/topics/i18n/
+REST_FRAMEWORK = {
+    'DEFAULT_LOCALE_PATHS': [
+        BASE_DIR / 'locale',
+    ],
+}
 
-LANGUAGE_CODE = 'en-us'
+
+LANGUAGE_CODE = 'de'  # язык по умолчанию, если Accept-Language не пришёл или не распознан
+
+LANGUAGES = [
+    ('de', 'Deutsch'),
+    ('en', 'English'),
+    ('uk', 'Українська'),
+]
+
+USE_I18N = True
+
+LOCALE_PATHS = [
+    BASE_DIR / 'locale',
+]
 
 TIME_ZONE = 'UTC'
 

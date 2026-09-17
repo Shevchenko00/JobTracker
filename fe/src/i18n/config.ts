@@ -20,8 +20,10 @@ i18n
             escapeValue: false,
         },
         detection: {
-            order: ['localStorage', 'navigator'],
-            caches: ['localStorage'],
+            order: ['querystring', 'cookie', 'localStorage'],
+            caches: ['cookie', 'localStorage'],
+            lookupCookie: 'language',        // <-- Теперь кука называются 'language'
+            lookupLocalStorage: 'language',  // <-- Теперь localStorage ключ называется 'language'
         },
     })
 

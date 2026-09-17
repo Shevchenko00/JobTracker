@@ -1,7 +1,7 @@
-import {useEffect, useMemo, useState} from 'react'
-import type {Application, ApplicationStatus} from '../types/application.ts'
-import type {Ordering} from '../types/ordering.ts'
-import type {PaginatedResponse} from '../types/pagination.ts'
+import { useEffect, useMemo, useState } from 'react'
+import type { Application, ApplicationStatus } from '../types/application.ts'
+import type { Ordering } from '../types/ordering.ts'
+import type { PaginatedResponse } from '../types/pagination.ts'
 
 const API_BASE = import.meta.env.VITE_API_URL
 const PAGE_SIZE = 10
@@ -13,6 +13,31 @@ export interface ApplicationPayload {
     url: string
     applied_at: string
     status: ApplicationStatus
+}
+
+const getLanguage = (): string => {
+    const language = localStorage.getItem('language')
+
+    if (language === 'uk' || language === 'de' || language === 'en') {
+        return language
+    }
+
+    return 'de'
+}
+
+const apiFetch = (
+    url: string,
+    options: RequestInit = {}
+): Promise<Response> => {
+    const language = getLanguage()
+
+    const headers = new Headers(options.headers || {})
+    headers.set('Accept-Language', language)
+
+    return fetch(url, {
+        ...options,
+        headers,
+    })
 }
 
 export function useApplications() {
@@ -34,7 +59,11 @@ export function useApplications() {
     // --- Pagination ---
     const [page, setPage] = useState(1)
     const [totalCount, setTotalCount] = useState(0)
-    const pageCount = Math.max(1, Math.ceil(totalCount / PAGE_SIZE))
+
+    const pageCount = Math.max(
+        1,
+        Math.ceil(totalCount / PAGE_SIZE)
+    )
 
     const hasActiveFilters =
         searchQuery.trim() !== '' ||
@@ -42,7 +71,7 @@ export function useApplications() {
         dateFrom !== '' ||
         dateTo !== ''
 
-    // Debounce der Freitextsuche, damit nicht bei jedem Tastenanschlag ein Request rausgeht
+    // --- Search debounce ---
     useEffect(() => {
         const timeout = setTimeout(() => {
             setSearchQuery(searchInput.trim())
@@ -51,10 +80,16 @@ export function useApplications() {
         return () => clearTimeout(timeout)
     }, [searchInput])
 
-    // Bei Änderung der Filter/Sortierung immer zurück auf Seite 1
+    // --- Reset page when filters change ---
     useEffect(() => {
         setPage(1)
-    }, [searchQuery, activeStatuses, dateFrom, dateTo, ordering])
+    }, [
+        searchQuery,
+        activeStatuses,
+        dateFrom,
+        dateTo,
+        ordering,
+    ])
 
     const buildQueryString = (targetPage: number) => {
         const params = new URLSearchParams()
@@ -64,7 +99,10 @@ export function useApplications() {
         }
 
         if (activeStatuses.length > 0) {
-            params.set('status', activeStatuses.join(','))
+            params.set(
+                'status',
+                activeStatuses.join(',')
+            )
         }
 
         if (dateFrom) {
@@ -88,11 +126,14 @@ export function useApplications() {
         return query ? `?${query}` : ''
     }
 
-    const fetchApplications = async (targetPage: number = page) => {
+    const fetchApplications = async (
+        targetPage: number = page
+    ) => {
         setIsLoading(true)
         setLoadError(false)
+
         try {
-            const response = await fetch(
+            const response = await apiFetch(
                 `${API_BASE}/${buildQueryString(targetPage)}`
             )
 
@@ -108,7 +149,11 @@ export function useApplications() {
             setApplications(data.results)
             setTotalCount(data.count)
         } catch (error) {
-            console.error('Fehler beim Laden der Bewerbungen:', error)
+            console.error(
+                'Fehler beim Laden der Bewerbungen:',
+                error
+            )
+
             setLoadError(true)
         } finally {
             setIsLoading(false)
@@ -117,13 +162,27 @@ export function useApplications() {
 
     useEffect(() => {
         fetchApplications(page)
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [searchQuery, activeStatuses, dateFrom, dateTo, ordering, page])
 
-    const toggleStatusFilter = (status: ApplicationStatus) => {
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [
+        searchQuery,
+        activeStatuses,
+        dateFrom,
+        dateTo,
+        ordering,
+        page,
+    ])
+
+    // --- Filters ---
+
+    const toggleStatusFilter = (
+        status: ApplicationStatus
+    ) => {
         setActiveStatuses((prev) =>
             prev.includes(status)
-                ? prev.filter((item) => item !== status)
+                ? prev.filter(
+                      (item) => item !== status
+                  )
                 : [...prev, status]
         )
     }
@@ -137,68 +196,93 @@ export function useApplications() {
         setOrdering('-applied_at')
     }
 
+    // --- Status counts ---
+
     const statusCounts = useMemo(() => {
         return applications.reduce(
             (acc, application) => {
                 acc[application.status] += 1
+
                 return acc
             },
-            {pending: 0, accepted: 0, rejected: 0} as Record<
+            {
+                pending: 0,
+                accepted: 0,
+                rejected: 0,
+            } as Record<
                 ApplicationStatus,
                 number
             >
         )
     }, [applications])
 
-    const createApplication = async (payload: ApplicationPayload) => {
-    const response = await fetch(`${API_BASE}/create/`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
-    })
+    // --- Create ---
 
-    if (!response.ok) {
-        const data = await response.json()
+    const createApplication = async (
+        payload: ApplicationPayload
+    ) => {
+        const response = await apiFetch(
+            `${API_BASE}/create/`,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(payload),
+            }
+        )
 
-        throw data
+        if (!response.ok) {
+            const data = await response.json()
+
+            throw data
+        }
+
+        if (page === 1) {
+            await fetchApplications(1)
+        } else {
+            setPage(1)
+        }
     }
 
-    if (page === 1) {
-        await fetchApplications(1)
-    } else {
-        setPage(1)
-    }
-}
-
+    // --- Update ---
 
     const updateApplication = async (
-    id: number,
-    payload: ApplicationPayload
-) => {
-    const response = await fetch(`${API_BASE}/update/${id}/`, {
-        method: 'PATCH',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
-    })
+        id: number,
+        payload: ApplicationPayload
+    ) => {
+        const response = await apiFetch(
+            `${API_BASE}/update/${id}/`,
+            {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(payload),
+            }
+        )
 
-    if (!response.ok) {
-        const data = await response.json()
+        if (!response.ok) {
+            const data = await response.json()
 
-        throw data
+            throw data
+        }
+
+        await fetchApplications(page)
     }
 
-    await fetchApplications(page)
-}
+    // --- Delete ---
 
-    const deleteApplication = async (id: number) => {
+    const deleteApplication = async (
+        id: number
+    ) => {
         try {
-            const response = await fetch(`${API_BASE}/delete/${id}/`, {
-                method: 'DELETE',
-            })
+            const response = await apiFetch(
+                `${API_BASE}/delete/${id}/`,
+                {
+                    method: 'DELETE',
+                }
+            )
 
             if (!response.ok) {
                 throw new Error(
@@ -206,19 +290,26 @@ export function useApplications() {
                 )
             }
 
-            // Wenn das letzte Element der Seite gelöscht wurde, eine Seite zurück,
-            // sonst aktuelle Seite neu laden, damit die Liste mit dem Server übereinstimmt.
-            const isLastItemOnPage = applications.length === 1
+            const isLastItemOnPage =
+                applications.length === 1
+
             const targetPage =
-                isLastItemOnPage && page > 1 ? page - 1 : page
+                isLastItemOnPage && page > 1
+                    ? page - 1
+                    : page
 
             if (targetPage !== page) {
                 setPage(targetPage)
             } else {
-                await fetchApplications(targetPage)
+                await fetchApplications(
+                    targetPage
+                )
             }
         } catch (error) {
-            console.error('Fehler beim Löschen der Bewerbung:', error)
+            console.error(
+                'Fehler beim Löschen der Bewerbung:',
+                error
+            )
         }
     }
 
@@ -229,16 +320,22 @@ export function useApplications() {
 
         searchInput,
         setSearchInput,
+
         activeStatuses,
         toggleStatusFilter,
+
         dateFrom,
         setDateFrom,
+
         dateTo,
         setDateTo,
+
         ordering,
         setOrdering,
+
         isFiltersOpen,
         setIsFiltersOpen,
+
         hasActiveFilters,
         handleResetFilters,
         statusCounts,

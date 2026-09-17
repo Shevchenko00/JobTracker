@@ -1,0 +1,93 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-09-17 16:59+0000\n"
+"PO-Revision-Date: 2026-09-17 16:59+0000\n"
+"Last-Translator: FULL NAME [EMAIL@ADDRESS](mailto:EMAIL@ADDRESS)\n"
+"Language-Team: German [LL@li.org](mailto:LL@li.org)\n"
+"Language: de\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: apps/jobs/models/job_applications.py:10
+msgid "Das Bewerbungsdatum darf nicht in der Zukunft liegen."
+msgstr "Das Bewerbungsdatum darf nicht in der Zukunft liegen."
+
+#: apps/jobs/models/job_applications.py:22
+msgid "Ausstehend"
+msgstr "Ausstehend"
+
+#: apps/jobs/models/job_applications.py:23
+msgid "Angenommen"
+msgstr "Angenommen"
+
+#: apps/jobs/models/job_applications.py:24
+msgid "Abgelehnt"
+msgstr "Abgelehnt"
+
+#: apps/jobs/models/job_applications.py:29
+msgid "Firmenname"
+msgstr "Firmenname"
+
+#: apps/jobs/models/job_applications.py:30
+msgid "Name des Unternehmens, bei dem du dich beworben hast."
+msgstr "Name des Unternehmens, bei dem du dich beworben hast."
+
+#: apps/jobs/models/job_applications.py:32
+msgid "Bitte gib den Firmennamen ein."
+msgstr "Bitte gib den Firmennamen ein."
+
+#: apps/jobs/models/job_applications.py:33
+msgid "Der Firmenname darf maximal 255 Zeichen lang sein."
+msgstr "Der Firmenname darf maximal 255 Zeichen lang sein."
+
+#: apps/jobs/models/job_applications.py:37
+msgid "Beschreibung"
+msgstr "Beschreibung"
+
+#: apps/jobs/models/job_applications.py:38
+msgid "Beschreibung der Position oder Bewerbung."
+msgstr "Beschreibung der Position oder Bewerbung."
+
+#: apps/jobs/models/job_applications.py:40
+msgid "Bitte gib eine Beschreibung ein."
+msgstr "Bitte gib eine Beschreibung ein."
+
+#: apps/jobs/models/job_applications.py:46
+msgid "Link zur Stellenanzeige"
+msgstr "Link zur Stellenanzeige"
+
+#: apps/jobs/models/job_applications.py:47
+msgid "Optionaler Link zur Stellenausschreibung."
+msgstr "Optionaler Link zur Stellenausschreibung."
+
+#: apps/jobs/models/job_applications.py:52
+msgid "Notizen"
+msgstr "Notizen"
+
+#: apps/jobs/models/job_applications.py:53
+msgid "Optionale persönliche Notizen zur Bewerbung."
+msgstr "Optionale persönliche Notizen zur Bewerbung."
+
+#: apps/jobs/models/job_applications.py:59
+msgid "Status"
+msgstr "Status"
+
+#: apps/jobs/models/job_applications.py:60
+msgid "Aktueller Stand der Bewerbung."
+msgstr "Aktueller Stand der Bewerbung."
+
+#: apps/jobs/models/job_applications.py:62
+msgid "Ungültiger Status ausgewählt."
+msgstr "Ungültiger Status ausgewählt."
+
+#: apps/jobs/models/job_applications.py:68
+msgid "Bewerbungsdatum"
+msgstr "Bewerbungsdatum"
+
+#: apps/jobs/models/job_applications.py:69
+msgid "Datum, an dem die Bewerbung abgeschickt wurde."
+msgstr "Datum, an dem die Bewerbung abgeschickt wurde."

@@ -94,14 +94,28 @@ function App() {
                 await createApplication(payload)
             }
 
-            // Закрываем модалку только если запрос прошёл успешно
             handleCloseModal()
-        } catch (error) {
-            if (error instanceof Error) {
+        } catch (error: unknown) {
+            if (typeof error === 'object' && error !== null && !('message' in error)) {
+                const apiErrors = error as Record<string, string[] | string>
+                
+                const firstKey = Object.keys(apiErrors)[0]
+                const firstError = apiErrors[firstKey]
+
+                if (Array.isArray(firstError)) {
+                    setFormError(firstError[0])
+                } else if (typeof firstError === 'string') {
+                    setFormError(firstError)
+                } else {
+                    setFormError(t('errors.unexpected', 'Ein unerwarteter Fehler ist aufgetreten.'))
+                }
+            } 
+            else if (error instanceof Error) {
                 setFormError(error.message)
-            } else {
+            } 
+            else {
                 setFormError(
-                    'Ein unerwarteter Fehler ist aufgetreten.'
+                    t('errors.unexpected', 'Ein unerwarteter Fehler ist aufgetreten.')
                 )
             }
         }
