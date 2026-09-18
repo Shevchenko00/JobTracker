@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import styles from '../../App.module.scss'
 import type { Application } from '../../types/application.ts'
 import { useStatusLabels } from '../../hooks/useStatusLabel.ts'
@@ -26,11 +26,25 @@ function ApplicationsTable({
     const { t, i18n } = useTranslation()
     const statusLabels = useStatusLabels()
     const [pendingDelete, setPendingDelete] = useState<Application | null>(null)
+    const dialogRef = useRef<HTMLDialogElement | null>(null)
+
+    const openDeleteDialog = (application: Application) => {
+        setPendingDelete(application)
+
+        requestAnimationFrame(() => {
+            dialogRef.current?.showModal()
+        })
+    }
+
+    const closeDeleteDialog = () => {
+        dialogRef.current?.close()
+        setPendingDelete(null)
+    }
 
     const handleConfirmDelete = () => {
         if (pendingDelete) {
             onDelete(pendingDelete.id)
-            setPendingDelete(null)
+            closeDeleteDialog()
         }
     }
 
@@ -122,17 +136,17 @@ function ApplicationsTable({
                                 </td>
 
                                 <td>
-                                        <span
-                                            className={`${styles.status} ${
-                                                application.status === 'accepted'
-                                                    ? styles.success
-                                                    : application.status === 'rejected'
-                                                        ? styles.rejected
-                                                        : styles.pending
-                                            }`}
-                                        >
-                                            {statusLabels[application.status]}
-                                        </span>
+                                    <span
+                                        className={`${styles.status} ${
+    application.status === 'accepted'
+        ? styles.success
+        : application.status === 'rejected'
+            ? styles.rejected
+            : styles.pending
+}`}
+                                    >
+                                        {statusLabels[application.status]}
+                                    </span>
                                 </td>
 
                                 <td className={styles.actions}>
@@ -148,7 +162,7 @@ function ApplicationsTable({
 
                                     <button
                                         className={styles.deleteButton}
-                                        onClick={() => setPendingDelete(application)}
+                                        onClick={() => openDeleteDialog(application)}
                                         aria-label={t('actions.delete')}
                                         title={t('actions.delete')}
                                         type="button"
@@ -170,17 +184,21 @@ function ApplicationsTable({
                     </tbody>
                 </table>
 
-                {pendingDelete && (
-                    <div
-                        className={styles.modalOverlay}
-                        onClick={() => setPendingDelete(null)}
-                    >
-                        <div
-                            className={styles.modal}
-                            onClick={(e) => e.stopPropagation()}
-                            role="dialog"
-                            aria-modal="true"
-                        >
+                <dialog
+                    ref={dialogRef}
+                    className={styles.modal}
+                    onCancel={closeDeleteDialog}
+                    aria-labelledby="delete-dialog-title"
+                >
+                    {pendingDelete && (
+                        <>
+                            <h2
+                                id="delete-dialog-title"
+                                className={styles.modalTitle}
+                            >
+                                {t('actions.delete')}
+                            </h2>
+
                             <p className={styles.modalText}>
                                 {t('table.confirmDelete', {
                                     company: pendingDelete.company_name,
@@ -191,7 +209,7 @@ function ApplicationsTable({
                                 <button
                                     type="button"
                                     className={styles.modalCancel}
-                                    onClick={() => setPendingDelete(null)}
+                                    onClick={closeDeleteDialog}
                                 >
                                     {t('actions.cancel')}
                                 </button>
@@ -204,9 +222,9 @@ function ApplicationsTable({
                                     {t('actions.delete')}
                                 </button>
                             </div>
-                        </div>
-                    </div>
-                )}
+                        </>
+                    )}
+                </dialog>
             </div>
         </>
     )

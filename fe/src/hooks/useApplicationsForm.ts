@@ -32,7 +32,7 @@ export function useApplicationForm() {
 
     const [editingId, setEditingId] = useState<number | null>(null)
     const [values, setValues] = useState<ApplicationFormValues>(
-        getInitialValues()
+        () => getInitialValues()
     )
     const [errors, setErrors] = useState<ApplicationFormErrors>({})
 
@@ -44,7 +44,6 @@ export function useApplicationForm() {
     ) => {
         setValues((prev) => ({...prev, [field]: value}))
 
-        // Fehlermeldung verschwindet, sobald das Feld bearbeitet wird
         if ((errors as Record<string, string | undefined>)[field]) {
             setErrors((prev) => ({...prev, [field]: undefined}))
         }

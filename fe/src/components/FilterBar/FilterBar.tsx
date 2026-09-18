@@ -50,6 +50,8 @@ function FiltersBar({
     const statusLabels = useStatusLabels()
     const orderingLabels = useOrderingLabels()
 
+    const activeStatusSet = new Set(activeStatuses)
+
     return (
         <>
             <section className={styles.filtersBar}>
@@ -83,10 +85,10 @@ function FiltersBar({
                             key={status}
                             type="button"
                             className={`${styles.pill} ${
-                                activeStatuses.includes(status)
-                                    ? styles.pillActive
-                                    : ''
-                            } ${styles[`pill_${status}`]}`}
+    activeStatusSet.has(status)
+        ? styles.pillActive
+        : ''
+} ${styles[`pill_${status}`]}`}
                             onClick={() => onToggleStatus(status)}
                         >
                             {statusLabels[status]}

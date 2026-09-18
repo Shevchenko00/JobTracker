@@ -45,18 +45,14 @@ export function useApplications() {
     const [isLoading, setIsLoading] = useState(true)
     const [loadError, setLoadError] = useState(false)
 
-    // --- Filter ---
     const [searchInput, setSearchInput] = useState('')
     const [searchQuery, setSearchQuery] = useState('')
-    const [activeStatuses, setActiveStatuses] = useState<
-        ApplicationStatus[]
-    >([])
+    const [activeStatuses, setActiveStatuses] = useState<ApplicationStatus[]>([])
     const [dateFrom, setDateFrom] = useState('')
     const [dateTo, setDateTo] = useState('')
     const [ordering, setOrdering] = useState<Ordering>('-applied_at')
     const [isFiltersOpen, setIsFiltersOpen] = useState(false)
 
-    // --- Pagination ---
     const [page, setPage] = useState(1)
     const [totalCount, setTotalCount] = useState(0)
 
@@ -71,7 +67,6 @@ export function useApplications() {
         dateFrom !== '' ||
         dateTo !== ''
 
-    // --- Search debounce ---
     useEffect(() => {
         const timeout = setTimeout(() => {
             setSearchQuery(searchInput.trim())
@@ -80,7 +75,6 @@ export function useApplications() {
         return () => clearTimeout(timeout)
     }, [searchInput])
 
-    // --- Reset page when filters change ---
     useEffect(() => {
         setPage(1)
     }, [
@@ -127,14 +121,18 @@ export function useApplications() {
     }
 
     const fetchApplications = async (
-        targetPage: number = page
+        targetPage: number,
+        signal?: AbortSignal
     ) => {
         setIsLoading(true)
         setLoadError(false)
 
         try {
             const response = await apiFetch(
-                `${API_BASE}/${buildQueryString(targetPage)}`
+                `${API_BASE}/${buildQueryString(targetPage)}`,
+                {
+                    signal,
+                }
             )
 
             if (!response.ok) {
@@ -146,9 +144,24 @@ export function useApplications() {
             const data: PaginatedResponse<Application> =
                 await response.json()
 
+            if (signal?.aborted) {
+                return
+            }
+
             setApplications(data.results)
             setTotalCount(data.count)
         } catch (error) {
+            if (
+                error instanceof DOMException &&
+                error.name === 'AbortError'
+            ) {
+                return
+            }
+
+            if (signal?.aborted) {
+                return
+            }
+
             console.error(
                 'Fehler beim Laden der Bewerbungen:',
                 error
@@ -156,14 +169,24 @@ export function useApplications() {
 
             setLoadError(true)
         } finally {
-            setIsLoading(false)
+            if (!signal?.aborted) {
+                setIsLoading(false)
+            }
         }
     }
 
+    // eslint-disable-next-line react-doctor/no-fetch-in-effect
     useEffect(() => {
-        fetchApplications(page)
+        const controller = new AbortController()
 
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+        void fetchApplications(
+            page,
+            controller.signal
+        )
+
+        return () => {
+            controller.abort()
+        }
     }, [
         searchQuery,
         activeStatuses,
@@ -173,16 +196,14 @@ export function useApplications() {
         page,
     ])
 
-    // --- Filters ---
-
     const toggleStatusFilter = (
         status: ApplicationStatus
     ) => {
         setActiveStatuses((prev) =>
             prev.includes(status)
                 ? prev.filter(
-                      (item) => item !== status
-                  )
+                    (item) => item !== status
+                )
                 : [...prev, status]
         )
     }
@@ -196,8 +217,6 @@ export function useApplications() {
         setOrdering('-applied_at')
     }
 
-    // --- Status counts ---
-
     const statusCounts = useMemo(() => {
         return applications.reduce(
             (acc, application) => {
@@ -209,14 +228,9 @@ export function useApplications() {
                 pending: 0,
                 accepted: 0,
                 rejected: 0,
-            } as Record<
-                ApplicationStatus,
-                number
-            >
+            } as Record<ApplicationStatus, number>
         )
     }, [applications])
-
-    // --- Create ---
 
     const createApplication = async (
         payload: ApplicationPayload
@@ -245,8 +259,6 @@ export function useApplications() {
         }
     }
 
-    // --- Update ---
-
     const updateApplication = async (
         id: number,
         payload: ApplicationPayload
@@ -270,8 +282,6 @@ export function useApplications() {
 
         await fetchApplications(page)
     }
-
-    // --- Delete ---
 
     const deleteApplication = async (
         id: number
@@ -301,9 +311,7 @@ export function useApplications() {
             if (targetPage !== page) {
                 setPage(targetPage)
             } else {
-                await fetchApplications(
-                    targetPage
-                )
+                await fetchApplications(targetPage)
             }
         } catch (error) {
             console.error(
@@ -350,3 +358,5 @@ export function useApplications() {
         deleteApplication,
     }
 }
+
+export default useApplications
