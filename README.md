@@ -1,39 +1,39 @@
 # JobTracker
 
-JobTracker — веб-приложение для удобного ведения и контроля откликов на вакансии. Проект помогает сохранять информацию о компаниях и вакансиях, отслеживать этапы поиска работы, быстро находить нужные записи и управлять ими в одном месте.
+JobTracker is a web application for conveniently managing and tracking job applications. The project helps users save information about companies and vacancies, track the stages of their job search, quickly find the required records, and manage everything in one place.
 
-## Возможности
+## Features
 
-- добавление, редактирование и удаление откликов на вакансии;
-- хранение информации о вакансии и компании;
-- просмотр откликов в виде таблицы;
-- фильтрация и поиск по списку вакансий;
-- пагинация больших списков;
-- экспорт данных в PDF;
-- переключение светлой и тёмной темы;
-- мультиязычный интерфейс;
-- автоматическое резервное копирование базы данных PostgreSQL.
+- adding, editing, and deleting job applications;
+- storing vacancy and company information;
+- viewing applications in a table;
+- filtering and searching through the list of vacancies;
+- pagination for large lists;
+- exporting data to PDF;
+- switching between light and dark themes;
+- multilingual interface;
+- automatic PostgreSQL database backups.
 
-## Поддерживаемые языки
+## Supported Languages
 
-Интерфейс приложения доступен на трёх языках:
+The application interface is available in three languages:
 
 - English (`en`);
-- Українська (`uk` / UA);
-- Deutsch (`de`).
+- Ukrainian (`uk` / UA);
+- German (`de`).
 
-## Технологии
+## Technologies
 
 ### Frontend
 
 - React 19;
 - TypeScript;
 - Vite;
-- Axios для HTTP-запросов к API;
-- i18next и react-i18next для локализации;
-- Sass/SCSS для стилизации;
-- jsPDF и jspdf-autotable для экспорта данных в PDF;
-- ESLint для проверки качества кода.
+- Axios for HTTP requests to the API;
+- i18next and react-i18next for localization;
+- Sass/SCSS for styling;
+- jsPDF and jspdf-autotable for exporting data to PDF;
+- ESLint for code quality checks.
 
 ### Backend
 
@@ -42,66 +42,66 @@ JobTracker — веб-приложение для удобного ведени�
 - Django REST Framework;
 - django-cors-headers;
 - PostgreSQL;
-- psycopg2 для подключения к PostgreSQL;
-- django-environ и python-dotenv для работы с переменными окружения.
+- psycopg2 for connecting to PostgreSQL;
+- django-environ and python-dotenv for working with environment variables.
 
-### Инфраструктура
+### Infrastructure
 
 - Docker;
 - Docker Compose;
 - PostgreSQL 17;
-- автоматические миграции Django;
-- ежедневное резервное копирование базы данных с хранением бэкапов за последние 7 дней.
+- automatic Django migrations;
+- daily database backups with backups retained for the last 7 days.
 
-## Структура проекта
+## Project Structure
 
 ```text
 JobTracker/
-├── backend/              # Django-приложение и REST API
-│   ├── apps/jobs/        # логика работы с откликами
-│   ├── config/           # настройки проекта
-│   ├── locale/           # локализация backend
-│   └── requirements.txt  # Python-зависимости
-├── fe/                   # React-приложение
-│   ├── src/components/   # UI-компоненты
-│   ├── src/hooks/        # пользовательские хуки
-│   ├── src/i18n/         # локализации en, uk и de
-│   └── package.json      # frontend-зависимости
-├── backups/              # резервные копии PostgreSQL
-└── docker-compose.yml    # конфигурация сервисов
+├── backend/              # Django application and REST API
+│   ├── apps/jobs/        # job application logic
+│   ├── config/           # project configuration
+│   ├── locale/           # backend localization
+│   └── requirements.txt  # Python dependencies
+├── fe/                   # React application
+│   ├── src/components/   # UI components
+│   ├── src/hooks/        # custom hooks
+│   ├── src/i18n/         # en, uk, and de localizations
+│   └── package.json      # frontend dependencies
+├── backups/              # PostgreSQL backups
+└── docker-compose.yml    # service configuration
 ```
 
-## Запуск через Docker Compose
+## Running with Docker Compose
 
-### Требования
+### Requirements
 
 - Docker;
 - Docker Compose.
 
-### Запуск
+### Launch
 
-Перед первым запуском создайте внешние Docker-ресурсы, указанные в `docker-compose.yml`:
+Before the first launch, create the external Docker resources specified in `docker-compose.yml`:
 
 ```bash
 docker network create jobs_network
 docker volume create jobs_postgres_data
 ```
 
-Запустите приложение:
+Start the application:
 
 ```bash
 docker compose up --build
 ```
 
-После запуска сервисы доступны по адресам:
+After startup, the services are available at:
 
 - frontend: http://localhost:5172
 - backend: http://localhost:9212
 - PostgreSQL: localhost:5433
 
-При старте backend автоматически выполняются миграции Django. Данные PostgreSQL сохраняются в Docker volume, а сервис резервного копирования ежедневно создаёт SQL-дамп в директории `backups/`.
+When the backend starts, Django migrations are applied automatically. PostgreSQL data is stored in a Docker volume, while the backup service creates a SQL dump every day in the `backups/` directory.
 
-## Локальная разработка
+## Local Development
 
 ### Backend
 
@@ -122,19 +122,19 @@ npm install
 npm run dev
 ```
 
-Основные команды frontend:
+Main frontend commands:
 
 ```bash
-npm run dev      # запуск dev-сервера
-npm run build    # проверка TypeScript и production-сборка
-npm run lint     # проверка ESLint
-npm run preview  # просмотр production-сборки
+npm run dev      # start the development server
+npm run build    # check TypeScript and create a production build
+npm run lint     # run ESLint checks
+npm run preview  # preview the production build
 ```
 
-## Архитектура
+## Architecture
 
-Проект состоит из React frontend и Django REST API backend. Frontend взаимодействует с backend через HTTP-запросы, а backend хранит данные в PostgreSQL. Все сервисы могут запускаться вместе через Docker Compose.
+The project consists of a React frontend and a Django REST API backend. The frontend communicates with the backend through HTTP requests, while the backend stores data in PostgreSQL. All services can be launched together using Docker Compose.
 
-## Лицензия
+## License
 
-Лицензия проекта пока не указана.
+No license has been specified for the project yet.
