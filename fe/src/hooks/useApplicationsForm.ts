@@ -1,7 +1,7 @@
 import {useState} from 'react'
 import {useTranslation} from 'react-i18next'
-import getTodayDateString from '../utils/getTodayDateString.ts'
-import type {Application, ApplicationStatus} from '../types/application.ts'
+import getTodayDateString from '@/utils/getTodayDateString.ts'
+import type {Application, ApplicationStatus} from '@/types/application.ts'
 
 export interface ApplicationFormValues {
     company: string

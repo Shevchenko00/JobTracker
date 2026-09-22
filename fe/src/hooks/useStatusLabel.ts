@@ -1,5 +1,5 @@
 import {useTranslation} from 'react-i18next'
-import type {ApplicationStatus} from '../types/application.ts'
+import type {ApplicationStatus} from '@/types/application.ts'
 
 export function useStatusLabels(): Record<ApplicationStatus, string> {
     const {t} = useTranslation()

@@ -1,5 +1,5 @@
 import {useTranslation} from 'react-i18next'
-import {useTheme} from '../../hooks/useTheme.ts'
+import { useTheme } from '@/hooks/useTheme'
 import styles from './ThemeToggle.module.scss'
 
 function ThemeToggle() {

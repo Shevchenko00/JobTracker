@@ -3,7 +3,7 @@ import autoTable from 'jspdf-autotable'
 import type {
     Application,
     ApplicationStatus,
-} from '../types/application.ts'
+} from '@/types/application.ts'
 
 function safeFormatDate(date: Date, locale: string): string {
     try {

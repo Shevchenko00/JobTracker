@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { Application, ApplicationStatus } from '../types/application.ts'
-import type { Ordering } from '../types/ordering.ts'
-import type { PaginatedResponse } from '../types/pagination.ts'
+import type { Ordering } from '@/types/ordering.ts'
+import type { PaginatedResponse } from '@/types/pagination.ts'
 
 const API_BASE = import.meta.env.VITE_API_URL
 const PAGE_SIZE = 10

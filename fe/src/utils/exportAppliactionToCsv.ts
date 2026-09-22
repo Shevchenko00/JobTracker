@@ -1,4 +1,4 @@
-import type {Application, ApplicationStatus} from '../types/application.ts'
+import type {Application, ApplicationStatus} from '@/types/application.ts'
 
 export interface CsvExportStrings {
     headers: {

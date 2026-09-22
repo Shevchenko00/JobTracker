@@ -1,5 +1,5 @@
 import {useTranslation} from 'react-i18next'
-import type {Ordering} from '../types/ordering.ts'
+import type {Ordering} from '@/types/ordering.ts'
 
 // ACHTUNG: Diese Werte sind eine Annahme, da mir der Inhalt von
 // types/ordering.ts nicht vorliegt. Bitte mit dem echten Ordering-Typ
