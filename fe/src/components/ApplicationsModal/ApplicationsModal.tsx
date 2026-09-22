@@ -1,6 +1,6 @@
 import type {FormEvent} from 'react'
 import {useTranslation} from 'react-i18next'
-import styles from '../../App.module.scss'
+import styles from './ApplicationsModal.module.scss'
 import type {ApplicationStatus} from '../../types/application.ts'
 import type {useApplicationForm} from '../../hooks/useApplicationForm.ts'
 

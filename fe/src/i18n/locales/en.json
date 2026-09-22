@@ -9,6 +9,7 @@
     "edit": "Edit application",
     "delete": "Delete application",
     "close": "Close",
+    "cancel": "Cancel",
     "exportCsv": "Export CSV"
   },
   "table": {
@@ -22,6 +23,7 @@
     "loading": "Loading applications...",
     "loadError": "Applications could not be loaded.",
     "loadErrorRetry": "Please try again.",
+    "confirmDelete": "Are you sure you want to delete this application?",
     "emptyFiltered": "No applications match the selected filters",
     "emptyDefault": "No applications yet"
   },

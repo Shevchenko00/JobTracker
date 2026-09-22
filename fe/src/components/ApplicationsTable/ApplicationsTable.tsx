@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { useRef, useState } from 'react'
-import styles from '../../App.module.scss'
+import styles from './ApplicationsTable.module.scss'
 import type { Application } from '../../types/application.ts'
 import { useStatusLabels } from '../../hooks/useStatusLabel.ts'
 
@@ -111,7 +111,7 @@ function ApplicationsTable({
 
                                 <td className={styles.date}>
                                     {application.url ? (
-                                        <a
+                                    <a
                                             href={application.url}
                                             target="_blank"
                                             rel="noreferrer"
@@ -186,7 +186,7 @@ function ApplicationsTable({
 
                 <dialog
                     ref={dialogRef}
-                    className={styles.modal}
+                    className={styles.confirmDialog}
                     onCancel={closeDeleteDialog}
                     aria-labelledby="delete-dialog-title"
                 >

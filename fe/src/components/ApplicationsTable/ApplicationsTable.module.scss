@@ -1,0 +1,277 @@
+.tableWrapper {
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: var(--color-surface);
+  box-shadow: 0 2px 8px var(--color-shadow-sm);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+
+  th {
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-surface-subtle);
+    color: var(--color-text-tertiary);
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  td {
+    padding: 18px 20px;
+    border-bottom: 1px solid var(--color-border);
+    color: var(--color-text-secondary);
+    font-size: 14px;
+    vertical-align: middle;
+  }
+
+  tbody tr {
+    transition: background 0.15s ease;
+
+    &:hover {
+      background: var(--color-surface-subtle);
+    }
+
+    &:last-child td {
+      border-bottom: 0;
+    }
+  }
+}
+
+.company {
+  color: var(--color-text-primary) !important;
+  font-weight: 600;
+}
+
+.date {
+  color: var(--color-text-tertiary) !important;
+  white-space: nowrap;
+}
+
+/* =========================
+   Status
+   ========================= */
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 9px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.pending {
+  background: var(--color-status-pending-bg);
+  color: var(--color-status-pending-text);
+}
+
+.success {
+  background: var(--color-status-success-bg);
+  color: var(--color-status-success-text);
+}
+
+.rejected {
+  background: var(--color-status-rejected-bg);
+  color: var(--color-status-rejected-text);
+}
+
+/* =========================
+   Actions
+   ========================= */
+
+.actionsHead {
+  width: 1%;
+}
+
+.actions {
+  width: 1%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.editButton,
+.deleteButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+          background 0.15s ease,
+          color 0.15s ease;
+
+  &:active {
+    transform: translateY(1px);
+  }
+}
+
+.editButton {
+  font-size: 14px;
+
+  &:hover {
+    background: var(--color-accent-blue-bg);
+    color: var(--color-accent-blue);
+  }
+}
+
+.deleteButton {
+  font-size: 18px;
+
+  &:hover {
+    background: var(--color-danger-bg);
+    color: var(--color-danger);
+  }
+}
+
+/* =========================
+   Empty / loading
+   ========================= */
+
+.empty {
+  padding: 50px 20px !important;
+  text-align: center;
+  color: var(--color-text-muted) !important;
+  line-height: 1.6;
+}
+
+@keyframes skeletonPulse {
+  0%, 100% {
+    opacity: 0.55;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+.skeleton {
+  display: inline-block;
+  height: 14px;
+  border-radius: 6px;
+  background: var(--color-skeleton);
+  animation: skeletonPulse 1.4s ease-in-out infinite;
+}
+
+.skeletonCompany {
+  width: 100px;
+  height: 15px;
+}
+
+.skeletonText {
+  width: 140px;
+}
+
+.skeletonShort {
+  width: 70px;
+}
+
+.skeletonPill {
+  width: 80px;
+  height: 22px;
+  border-radius: 999px;
+}
+
+.skeletonIcon {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  margin-right: 4px;
+}
+
+/* =========================
+   Delete confirm dialog
+   ========================= */
+
+.confirmDialog {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  margin: 0;
+
+  width: 90%;
+  max-width: 360px;
+  padding: 24px;
+  box-sizing: border-box;
+
+  border: none;
+  border-radius: 12px;
+
+  background: var(--color-surface);
+  box-shadow: 0 10px 30px var(--color-shadow-lg);
+}
+
+.confirmDialog::backdrop {
+  background: var(--color-overlay);
+}
+
+.modalTitle {
+  margin: 0 0 8px;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.modalText {
+  margin: 0 0 20px;
+  color: var(--color-text-primary);
+  font-size: 15px;
+  line-height: 1.4;
+}
+
+.modalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.modalCancel,
+.modalConfirm {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.modalCancel {
+  background: var(--color-surface-hover);
+  color: var(--color-text-primary);
+}
+
+.modalConfirm {
+  background: var(--color-danger);
+  color: #ffffff;
+}
+
+/* =========================
+   Responsive
+   ========================= */
+
+@media (max-width: 700px) {
+  .tableWrapper {
+    overflow-x: auto;
+  }
+
+  .table {
+    min-width: 700px;
+  }
+}

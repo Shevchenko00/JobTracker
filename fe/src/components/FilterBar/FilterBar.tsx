@@ -1,5 +1,5 @@
 import {useTranslation} from 'react-i18next'
-import styles from '../../App.module.scss'
+import styles from './FilterBar.module.scss'
 import {useStatusLabels} from '../../hooks/useStatusLabel.ts'
 import {useOrderingLabels, orderingValues} from '../../hooks/useOrderingLabels.ts'
 import {statusOrder} from '../../types/status.ts'

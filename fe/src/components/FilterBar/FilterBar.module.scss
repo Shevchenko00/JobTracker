@@ -1,0 +1,194 @@
+/* =========================
+   Filters bar
+   ========================= */
+
+.filtersBar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin: 20px 0 12px;
+  padding: 14px 16px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+}
+
+.searchField {
+  position: relative;
+  flex: 1 1 260px;
+  min-width: 200px;
+  display: flex;
+  align-items: center;
+
+  input {
+    width: 100%;
+    padding: 9px 34px 9px 34px;
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    font-size: 14px;
+    color: var(--color-text-primary);
+    background: var(--color-surface-subtle);
+    transition: border-color 0.15s ease, background 0.15s ease;
+
+    &::placeholder {
+      color: var(--color-text-muted);
+    }
+
+    &:focus {
+      outline: none;
+      border-color: var(--color-border-hover);
+      background: var(--color-surface);
+    }
+  }
+}
+
+.searchIcon {
+  position: absolute;
+  left: 11px;
+  color: var(--color-text-muted);
+  font-size: 14px;
+  pointer-events: none;
+}
+
+.clearSearch {
+  position: absolute;
+  right: 8px;
+  border: none;
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 4px;
+
+  &:hover {
+    color: var(--color-text-secondary);
+  }
+}
+
+.statusPills {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-subtle);
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  &:hover {
+    border-color: var(--color-border-hover);
+    background: var(--color-surface-hover);
+  }
+}
+
+.pillCount {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: var(--color-pill-count-bg);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.pillActive {
+  color: #ffffff;
+  border-color: transparent;
+
+  .pillCount {
+    background: rgba(255, 255, 255, 0.25);
+  }
+}
+
+.pill_pending.pillActive {
+  background: var(--color-pill-pending);
+}
+
+.pill_accepted.pillActive {
+  background: var(--color-pill-accepted);
+}
+
+.pill_rejected.pillActive {
+  background: var(--color-pill-rejected);
+}
+
+.toggleFiltersButton,
+.resetFiltersButton {
+  padding: 8px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text-strong);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s ease;
+
+  &:hover {
+    background: var(--color-surface-hover);
+  }
+}
+
+.resetFiltersButton {
+  color: var(--color-danger);
+  border-color: var(--color-danger-border);
+
+  &:hover {
+    background: var(--color-danger-bg);
+  }
+}
+
+.filtersExpanded {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 14px 16px;
+  margin-bottom: 16px;
+  background: var(--color-surface-subtle);
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+
+  label {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--color-text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+
+    input,
+    select {
+      padding: 8px 10px;
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 400;
+      text-transform: none;
+      color: var(--color-text-primary);
+      background: var(--color-surface);
+
+      &:focus {
+        outline: none;
+        border-color: var(--color-border-hover);
+      }
+    }
+  }
+}

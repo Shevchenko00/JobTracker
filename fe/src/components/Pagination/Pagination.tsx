@@ -1,5 +1,5 @@
 import {useTranslation} from 'react-i18next'
-import styles from '../../App.module.scss'
+import styles from './Pagination.module.scss'
 
 interface PaginationProps {
     page: number
