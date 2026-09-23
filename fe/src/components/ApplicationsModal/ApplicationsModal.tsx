@@ -1,8 +1,8 @@
-import type {FormEvent} from 'react'
-import {useTranslation} from 'react-i18next'
+import type { FormEvent } from 'react'
+import { useTranslation } from 'react-i18next'
 import styles from './ApplicationsModal.module.scss'
-import type {ApplicationStatus} from '../../types/application.ts'
-import type {useApplicationForm} from '../../hooks/useApplicationForm.ts'
+import type { ApplicationStatus } from '@/types/application.ts'
+import type { useApplicationForm } from '@/hooks/useApplicationForm.ts'
 
 interface ApplicationModalProps {
     isOpen: boolean
@@ -19,7 +19,7 @@ function ApplicationModal({
     onClose,
     onSubmit,
 }: ApplicationModalProps) {
-    const {t} = useTranslation()
+    const { t } = useTranslation()
 
     if (!isOpen) {
         return null
@@ -40,14 +40,19 @@ function ApplicationModal({
             return
         }
 
-        onSubmit()
+        void onSubmit()
     }
 
     return (
-        <div className={styles.overlay} onClick={onClose}>
+        <div
+            className={styles.overlay}
+            onClick={onClose}
+        >
             <div
                 className={styles.modal}
-                onClick={(event) => event.stopPropagation()}
+                onClick={(event) =>
+                    event.stopPropagation()
+                }
             >
                 <div className={styles.modalHeader}>
                     <div>
@@ -85,12 +90,17 @@ function ApplicationModal({
 
                         <input
                             type="text"
-                            placeholder={t('form.companyPlaceholder')}
+                            placeholder={t(
+                                'form.companyPlaceholder'
+                            )}
                             value={values.company}
                             className={
                                 errors.company
                                     ? styles.inputError
                                     : ''
+                            }
+                            aria-invalid={
+                                Boolean(errors.company)
                             }
                             onChange={(event) =>
                                 setField(
@@ -101,7 +111,11 @@ function ApplicationModal({
                         />
 
                         {errors.company && (
-                            <span className={styles.fieldError}>
+                            <span
+                                className={
+                                    styles.fieldError
+                                }
+                            >
                                 {errors.company}
                             </span>
                         )}
@@ -121,6 +135,9 @@ function ApplicationModal({
                                     ? styles.inputError
                                     : ''
                             }
+                            aria-invalid={
+                                Boolean(errors.description)
+                            }
                             onChange={(event) =>
                                 setField(
                                     'description',
@@ -130,7 +147,11 @@ function ApplicationModal({
                         />
 
                         {errors.description && (
-                            <span className={styles.fieldError}>
+                            <span
+                                className={
+                                    styles.fieldError
+                                }
+                            >
                                 {errors.description}
                             </span>
                         )}
@@ -183,6 +204,9 @@ function ApplicationModal({
                                     ? styles.inputError
                                     : ''
                             }
+                            aria-invalid={
+                                Boolean(errors.appliedAt)
+                            }
                             onChange={(event) =>
                                 setField(
                                     'appliedAt',
@@ -192,7 +216,11 @@ function ApplicationModal({
                         />
 
                         {errors.appliedAt && (
-                            <span className={styles.fieldError}>
+                            <span
+                                className={
+                                    styles.fieldError
+                                }
+                            >
                                 {errors.appliedAt}
                             </span>
                         )}

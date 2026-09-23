@@ -1,5 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
-import type { Application, ApplicationStatus } from '../types/application.ts'
+import type {
+    Application,
+    ApplicationStatus,
+} from '../types/application.ts'
 import type { Ordering } from '@/types/ordering.ts'
 import type { PaginatedResponse } from '@/types/pagination.ts'
 
@@ -15,10 +18,36 @@ export interface ApplicationPayload {
     status: ApplicationStatus
 }
 
+export interface ApplicationApiError {
+    code?: string
+    message?: string
+    application_id?: number
+    detail?: string | Record<string, unknown>
+}
+
+export class ApplicationApiException extends Error {
+    code?: string
+    application_id?: number
+    detail?: string | Record<string, unknown>
+
+    constructor(data: ApplicationApiError) {
+        super(data.message ?? 'Request failed')
+
+        this.name = 'ApplicationApiException'
+        this.code = data.code
+        this.application_id = data.application_id
+        this.detail = data.detail
+    }
+}
+
 const getLanguage = (): string => {
     const language = localStorage.getItem('language')
 
-    if (language === 'uk' || language === 'de' || language === 'en') {
+    if (
+        language === 'uk' ||
+        language === 'de' ||
+        language === 'en'
+    ) {
         return language
     }
 
@@ -38,6 +67,29 @@ const apiFetch = (
         ...options,
         headers,
     })
+}
+
+const parseApiError = async (
+    response: Response
+): Promise<ApplicationApiError> => {
+    try {
+        const data: unknown = await response.json()
+
+        if (
+            data !== null &&
+            typeof data === 'object'
+        ) {
+            return data as ApplicationApiError
+        }
+
+        return {
+            message: `Request failed with status ${response.status}`,
+        }
+    } catch {
+        return {
+            message: `Request failed with status ${response.status}`,
+        }
+    }
 }
 
 export function useApplications() {
@@ -136,9 +188,9 @@ export function useApplications() {
             )
 
             if (!response.ok) {
-                throw new Error(
-                    `Fehler beim Laden der Bewerbungen: ${response.status}`
-                )
+                const data = await parseApiError(response)
+
+                throw new ApplicationApiException(data)
             }
 
             const data: PaginatedResponse<Application> =
@@ -247,9 +299,9 @@ export function useApplications() {
         )
 
         if (!response.ok) {
-            const data = await response.json()
+            const data = await parseApiError(response)
 
-            throw data
+            throw new ApplicationApiException(data)
         }
 
         if (page === 1) {
@@ -275,9 +327,9 @@ export function useApplications() {
         )
 
         if (!response.ok) {
-            const data = await response.json()
+            const data = await parseApiError(response)
 
-            throw data
+            throw new ApplicationApiException(data)
         }
 
         await fetchApplications(page)
@@ -295,9 +347,9 @@ export function useApplications() {
             )
 
             if (!response.ok) {
-                throw new Error(
-                    `Fehler beim Löschen der Bewerbung: ${response.status}`
-                )
+                const data = await parseApiError(response)
+
+                throw new ApplicationApiException(data)
             }
 
             const isLastItemOnPage =

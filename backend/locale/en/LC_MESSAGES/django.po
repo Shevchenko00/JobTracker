@@ -91,3 +91,7 @@ msgstr "Application date"
 #: apps/jobs/models/job_applications.py:69
 msgid "Datum, an dem die Bewerbung abgeschickt wurde."
 msgstr "Date on which the application was submitted."
+
+#: apps/jobs/views/jobs_applications_view.py
+msgid "Für dieses Unternehmen existiert bereits eine Bewerbung mit diesem Datum."
+msgstr "An application for this company already exists for this date."

@@ -115,3 +115,7 @@ msgstr "Недійсний статус: %(values)s. Дозволені знач
 #: apps/jobs/views/jobs_applications_view.py:89
 msgid "Ungültiges Datumsformat. Bitte JJJJ-MM-TT verwenden (z. B. 2026-01-31)."
 msgstr "Невірний формат дати. Використовуйте формат РРРР-ММ-ДД (наприклад, 2026-01-31)."
+
+#: apps/jobs/views/jobs_applications_view.py
+msgid "Für dieses Unternehmen existiert bereits eine Bewerbung mit diesem Datum."
+msgstr "Для цієї компанії вже існує заявка з цією датою."

@@ -33,6 +33,7 @@ class JobsApplicationModel(models.Model):
             "max_length": _("Der Firmenname darf maximal 255 Zeichen lang sein."),
         },
     )
+
     description = models.TextField(
         verbose_name=_("Beschreibung"),
         help_text=_("Beschreibung der Position oder Bewerbung."),
@@ -40,18 +41,21 @@ class JobsApplicationModel(models.Model):
             "blank": _("Bitte gib eine Beschreibung ein."),
         },
     )
+
     url = models.TextField(
         null=True,
         blank=True,
         verbose_name=_("Link zur Stellenanzeige"),
         help_text=_("Optionaler Link zur Stellenausschreibung."),
     )
+
     notes = models.TextField(
         blank=True,
         null=True,
         verbose_name=_("Notizen"),
         help_text=_("Optionale persönliche Notizen zur Bewerbung."),
     )
+
     status = models.CharField(
         max_length=50,
         choices=STATUS_CHOICES,
@@ -62,6 +66,7 @@ class JobsApplicationModel(models.Model):
             "invalid_choice": _("Ungültiger Status ausgewählt."),
         },
     )
+
     applied_at = models.DateField(
         blank=True,
         null=True,
@@ -69,7 +74,9 @@ class JobsApplicationModel(models.Model):
         help_text=_("Datum, an dem die Bewerbung abgeschickt wurde."),
         validators=[validate_not_in_future],
         error_messages={
-            "invalid": _("Bitte gib ein gültiges Datum ein (Format: JJJJ-MM-TT)."),
+            "invalid": _(
+                "Bitte gib ein gültiges Datum ein (Format: JJJJ-MM-TT)."
+            ),
         },
     )
 
@@ -80,3 +87,26 @@ class JobsApplicationModel(models.Model):
 
     def __str__(self):
         return f"{self.company_name} ({self.get_status_display()})"
+
+    def find_duplicate(self):
+        """
+        Find another application with the same company and application date.
+
+        Returns:
+            JobsApplicationModel | None
+        """
+        if not self.company_name or not self.applied_at:
+            return None
+
+        company_name = " ".join(self.company_name.split())
+
+        queryset = JobsApplicationModel.objects.filter(
+            company_name__iexact=company_name,
+            applied_at=self.applied_at,
+        )
+
+        # Beim Update darf sich das Objekt nicht selbst als Duplikat finden.
+        if self.pk:
+            queryset = queryset.exclude(pk=self.pk)
+
+        return queryset.first()
