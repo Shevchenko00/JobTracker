@@ -8,6 +8,8 @@
     "addApplication": "Додати заявку",
     "edit": "Редагувати заявку",
     "delete": "Видалити заявку",
+    "importCsv": "Імпортувати CSV",
+    "importingCsv": "Імпортування...",
     "cancel": "Скасувати",
     "close": "Закрити",
     "exportCsv": "Експортувати CSV"
@@ -97,5 +99,8 @@
   },
   "csv": {
     "filename": "moyi-zayavky.csv"
-  }
+  },
+  "errors": {
+        "csvImport": "Помилка імпортування файлу CSV."
+    }
 }

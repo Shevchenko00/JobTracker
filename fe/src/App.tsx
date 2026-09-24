@@ -1,4 +1,4 @@
-import {useState} from 'react'
+import {useRef, useState} from 'react'
 import {useTranslation} from 'react-i18next'
 import styles from './App.module.scss'
 import {useApplications} from './hooks/useApplications.ts'
@@ -14,6 +14,7 @@ import LanguageSwitcher from './components/LanguageSwitcher/LanguageSwitcher.tsx
 import ThemeToggle from './components/ThemeToggle/ThemeToggle.tsx'
 import type {Application} from './types/application.ts'
 import {exportApplicationsToCSV} from './utils/exportAppliactionToCsv.ts'
+import {importApplicationsFromCSV} from './utils/importApplicationsFromCsv.ts'
 
 const PAGE_SIZE = 10
 
@@ -54,8 +55,11 @@ function App() {
 
     const form = useApplicationForm()
 
+    const fileInputRef = useRef<HTMLInputElement>(null)
+
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [formError, setFormError] = useState<string | null>(null)
+    const [isImporting, setIsImporting] = useState(false)
 
     const handleOpenCreateModal = () => {
         form.reset()
@@ -96,9 +100,13 @@ function App() {
 
             handleCloseModal()
         } catch (error: unknown) {
-            if (typeof error === 'object' && error !== null && !('message' in error)) {
+            if (
+                typeof error === 'object' &&
+                error !== null &&
+                !('message' in error)
+            ) {
                 const apiErrors = error as Record<string, string[] | string>
-                
+
                 const firstKey = Object.keys(apiErrors)[0]
                 const firstError = apiErrors[firstKey]
 
@@ -107,15 +115,21 @@ function App() {
                 } else if (typeof firstError === 'string') {
                     setFormError(firstError)
                 } else {
-                    setFormError(t('errors.unexpected', 'Ein unerwarteter Fehler ist aufgetreten.'))
+                    setFormError(
+                        t(
+                            'errors.unexpected',
+                            'Ein unerwarteter Fehler ist aufgetreten.',
+                        ),
+                    )
                 }
-            } 
-            else if (error instanceof Error) {
+            } else if (error instanceof Error) {
                 setFormError(error.message)
-            } 
-            else {
+            } else {
                 setFormError(
-                    t('errors.unexpected', 'Ein unerwarteter Fehler ist aufgetreten.')
+                    t(
+                        'errors.unexpected',
+                        'Ein unerwarteter Fehler ist aufgetreten.',
+                    ),
                 )
             }
         }
@@ -145,19 +159,87 @@ function App() {
     }
 
     const handleExportCSV = () => {
-        exportApplicationsToCSV(applications, {
+    exportApplicationsToCSV(
+        applications,
+        {
             headers: {
-                company: t('table.company'),
-                position: t('table.position'),
-                jobUrl: t('table.jobUrl'),
-                notes: t('table.notes'),
-                date: t('table.appliedAt'),
-                status: t('table.status'),
+                company: t(
+                    'table.company'
+                ),
+                position: t(
+                    'table.position'
+                ),
+                jobUrl: t(
+                    'table.jobUrl'
+                ),
+                notes: t(
+                    'table.notes'
+                ),
+                date: t(
+                    'table.appliedAt'
+                ),
+                status: t(
+                    'table.status'
+                ),
             },
+
             statusLabels,
-            locale: resolvePdfLocale(i18n.language),
-            filename: t('csv.filename'),
-        })
+
+            filename: t(
+                'csv.filename'
+            ),
+        }
+    )
+}
+
+
+
+    const handleImportCSV = async (
+        event: React.ChangeEvent<HTMLInputElement>,
+    ) => {
+        const file = event.target.files?.[0]
+
+        if (!file) {
+            return
+        }
+
+        setFormError(null)
+        setIsImporting(true)
+
+        try {
+            // Импорт НЕ зависит от текущего языка приложения.
+            // Utility сам распознаёт украинский,
+            // английский и немецкий CSV.
+            const importedApplications =
+                await importApplicationsFromCSV(file)
+
+            for (const application of importedApplications) {
+                await createApplication(application)
+            }
+
+            setPage(1)
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                setFormError(error.message)
+            } else {
+                setFormError(
+                    t(
+                        'errors.csvImport',
+                        'Fehler beim Importieren der CSV-Datei.',
+                    ),
+                )
+            }
+        } finally {
+            setIsImporting(false)
+
+            if (fileInputRef.current) {
+                fileInputRef.current.value = ''
+            }
+        }
+    }
+
+    const handleImportButtonClick = () => {
+        fileInputRef.current?.click()
     }
 
     return (
@@ -183,7 +265,8 @@ function App() {
                             onClick={handleExportPDF}
                             disabled={
                                 applications.length === 0 ||
-                                isLoading
+                                isLoading ||
+                                isImporting
                             }
                             type="button"
                         >
@@ -196,7 +279,8 @@ function App() {
                             onClick={handleExportCSV}
                             disabled={
                                 applications.length === 0 ||
-                                isLoading
+                                isLoading ||
+                                isImporting
                             }
                             type="button"
                         >
@@ -205,8 +289,36 @@ function App() {
                         </button>
 
                         <button
+                            className={styles.exportButton}
+                            onClick={handleImportButtonClick}
+                            disabled={
+                                isLoading ||
+                                isImporting
+                            }
+                            type="button"
+                        >
+                            <span>↑</span>
+
+                            {isImporting
+                                ? t(
+                                    'actions.importingCsv',
+                                    'Importing...',
+                                )
+                                : t('actions.importCsv')}
+                        </button>
+
+                        <input
+                            ref={fileInputRef}
+                            type="file"
+                            accept=".csv,text/csv"
+                            onChange={handleImportCSV}
+                            hidden
+                        />
+
+                        <button
                             className={styles.createButton}
                             onClick={handleOpenCreateModal}
+                            disabled={isImporting}
                             type="button"
                         >
                             <span>+</span>
@@ -214,6 +326,12 @@ function App() {
                         </button>
                     </div>
                 </header>
+
+                {formError && !isModalOpen && (
+                    <div role="alert">
+                        {formError}
+                    </div>
+                )}
 
                 <FiltersBar
                     searchInput={searchInput}
@@ -237,7 +355,7 @@ function App() {
 
                 <ApplicationsTable
                     applications={applications}
-                    isLoading={isLoading}
+                    isLoading={isLoading || isImporting}
                     loadError={loadError}
                     hasActiveFilters={hasActiveFilters}
                     onEdit={handleOpenEditModal}

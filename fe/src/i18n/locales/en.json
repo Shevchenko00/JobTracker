@@ -7,6 +7,8 @@
     "exportPdf": "Export PDF",
     "addApplication": "Add application",
     "edit": "Edit application",
+    "importCsv": "Import CSV",
+    "importingCsv": "Importing...",
     "delete": "Delete application",
     "close": "Close",
     "cancel": "Cancel",
@@ -97,5 +99,8 @@
   },
   "csv": {
     "filename": "my-applications.csv"
-  }
+  },
+  "errors": {
+        "csvImport": "Error importing CSV file."
+    }
 }

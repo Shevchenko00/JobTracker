@@ -5,6 +5,8 @@
   },
   "actions": {
     "exportPdf": "PDF exportieren",
+    "importCsv": "CSV importieren",
+    "importingCsv": "Importiere...",
     "addApplication": "Bewerbung hinzufügen",
     "edit": "Bewerbung bearbeiten",
     "cancel": "Abbrechen",
@@ -97,5 +99,8 @@
   },
   "csv": {
     "filename": "meine-bewerbungen.csv"
-  }
+  },
+  "errors": {
+        "csvImport": "Fehler beim Importieren der CSV-Datei."
+    }
 }
