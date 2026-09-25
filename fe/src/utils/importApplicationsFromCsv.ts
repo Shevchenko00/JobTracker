@@ -20,162 +20,94 @@ type CsvField =
     | 'status'
 
 /**
- * Все поддерживаемые названия колонок.
+ * Поддерживаемые названия колонок.
+ *
+ * Оставлены только варианты, реально встречающиеся в экспортах
+ * приложения (DE / UK / EN), плюс базовые "голые" синонимы
+ * (company / unternehmen / компанія), которыми пользователь мог бы
+ * назвать колонку вручную.
  *
  * Импорт НЕ зависит от текущего языка интерфейса.
  */
 const HEADER_ALIASES: Record<CsvField, string[]> = {
     company_name: [
-        // Ukrainian
         'компанія',
-        'назва компанії',
-
-        // English
         'company',
-        'company name',
-
-        // German
         'unternehmen',
-        'firmenname',
     ],
 
     description: [
-        // Ukrainian
         'посада / опис',
-        'посада/опис',
-        'посада',
-        'опис',
-
-        // English
         'position / description',
-        'position/description',
-        'position',
-        'description',
-        'job title',
-
-        // German
         'position / beschreibung',
-        'position/beschreibung',
-        'position',
-        'beschreibung',
-        'jobtitel',
     ],
 
     url: [
-        // Ukrainian
         'посилання на вакансію',
-        'посилання',
-
-        // English
         'job url',
-        'job link',
-        'url',
-        'link',
-
-        // German
-        'job-url',
-        'job url',
-        'job-link',
-        'link',
-        'url',
     ],
 
     notes: [
-        // Ukrainian
         'нотатки',
-        'замітки',
-
-        // English
         'notes',
-
-        // German
         'notizen',
-        'bemerkungen',
     ],
 
     applied_at: [
-        // Ukrainian
         'дата подання',
-        'дата',
-
-        // English
         'applied on',
-        'applied date',
-        'date',
-
-        // German
         'bewerbungsdatum',
-        'datum',
     ],
 
     status: [
-        // Ukrainian
         'статус',
-
-        // English
-        'status',
-
-        // German
         'status',
     ],
 }
 
-
+/**
+ * Значения статуса.
+ *
+ * 'pending' / 'accepted' / 'rejected' — это те же слова, что
+ * возвращает API, поэтому они присутствуют во всех списках как
+ * базовый вариант.
+ *
+ * ВАЖНО: одно и то же слово не должно встречаться в двух разных
+ * статусах — проверка идёт по порядку (pending → accepted →
+ * rejected), и совпадение "перехватывается" первым же списком, в
+ * котором оно найдено. Раньше 'rejected' и 'відмова' стояли и в
+ * pending, и в rejected одновременно — из-за этого "Rejected" /
+ * "Відмова" всегда распознавались как pending.
+ */
 const STATUS_ALIASES: Record<ApplicationStatus, string[]> = {
     pending: [
-        // API
         'pending',
-
-        // Ukrainian
         'на розгляді',
-        'запрошення',
-        'відмова',
         'в очікуванні',
-
-        // English
+        'запрошення',
         'in progress',
         'interview',
-        'rejected',
-
-        // German
-        'in Bearbeitung',
+        'in bearbeitung',
         'einladung',
-        'absage',
     ],
 
     accepted: [
-        // API
         'accepted',
-
-        // Ukrainian
         'прийнято',
         'прийнята',
         'прийнятий',
-
-        // English
-        'accepted',
-
-        // German
         'angenommen',
         'akzeptiert',
         'zugesagt',
     ],
 
     rejected: [
-        // API
         'rejected',
-
-        // Ukrainian
         'відхилено',
         'відхилена',
         'відмова',
-
-        // English
-        'rejected',
-
-        // German
         'abgelehnt',
-        'abgelehnt worden',
+        'absage',
     ],
 }
 
