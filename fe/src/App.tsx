@@ -1,4 +1,4 @@
-import {useRef, useState} from 'react'
+import {useState} from 'react'
 import {useTranslation} from 'react-i18next'
 import styles from './App.module.scss'
 import {useApplications} from './hooks/useApplications.ts'
@@ -12,9 +12,10 @@ import Pagination from './components/Pagination/Pagination.tsx'
 import ApplicationModal from './components/ApplicationsModal/ApplicationsModal.tsx'
 import LanguageSwitcher from './components/LanguageSwitcher/LanguageSwitcher.tsx'
 import ThemeToggle from './components/ThemeToggle/ThemeToggle.tsx'
+import {ImportPreviewModal} from './components/ImportPreviewModal/ImportPreviewModal.tsx'
 import type {Application} from './types/application.ts'
+import type {ImportApplication} from './utils/importApplicationsFromCsv.ts'
 import {exportApplicationsToCSV} from './utils/exportAppliactionToCsv.ts'
-import {importApplicationsFromCSV} from './utils/importApplicationsFromCsv.ts'
 
 const PAGE_SIZE = 10
 
@@ -55,11 +56,9 @@ function App() {
 
     const form = useApplicationForm()
 
-    const fileInputRef = useRef<HTMLInputElement>(null)
-
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [formError, setFormError] = useState<string | null>(null)
-    const [isImporting, setIsImporting] = useState(false)
+    const [isImportModalOpen, setIsImportModalOpen] = useState(false)
 
     const handleOpenCreateModal = () => {
         form.reset()
@@ -159,87 +158,42 @@ function App() {
     }
 
     const handleExportCSV = () => {
-    exportApplicationsToCSV(
-        applications,
-        {
-            headers: {
-                company: t(
-                    'table.company'
-                ),
-                position: t(
-                    'table.position'
-                ),
-                jobUrl: t(
-                    'table.jobUrl'
-                ),
-                notes: t(
-                    'table.notes'
-                ),
-                date: t(
-                    'table.appliedAt'
-                ),
-                status: t(
-                    'table.status'
-                ),
-            },
+        exportApplicationsToCSV(
+            applications,
+            {
+                headers: {
+                    company: t('table.company'),
+                    position: t('table.position'),
+                    jobUrl: t('table.jobUrl'),
+                    notes: t('table.notes'),
+                    date: t('table.appliedAt'),
+                    status: t('table.status'),
+                },
 
-            statusLabels,
+                statusLabels,
 
-            filename: t(
-                'csv.filename'
-            ),
-        }
-    )
-}
-
-
-
-    const handleImportCSV = async (
-        event: React.ChangeEvent<HTMLInputElement>,
-    ) => {
-        const file = event.target.files?.[0]
-
-        if (!file) {
-            return
-        }
-
-        setFormError(null)
-        setIsImporting(true)
-
-        try {
-            // Импорт НЕ зависит от текущего языка приложения.
-            // Utility сам распознаёт украинский,
-            // английский и немецкий CSV.
-            const importedApplications =
-                await importApplicationsFromCSV(file)
-
-            for (const application of importedApplications) {
-                await createApplication(application)
+                filename: t('csv.filename'),
             }
-
-            setPage(1)
-        } catch (error: unknown) {
-            if (error instanceof Error) {
-                setFormError(error.message)
-            } else {
-                setFormError(
-                    t(
-                        'errors.csvImport',
-                        'Fehler beim Importieren der CSV-Datei.',
-                    ),
-                )
-            }
-        } finally {
-            setIsImporting(false)
-
-            if (fileInputRef.current) {
-                fileInputRef.current.value = ''
-            }
-        }
+        )
     }
 
     const handleImportButtonClick = () => {
-        fileInputRef.current?.click()
+        setFormError(null)
+        setIsImportModalOpen(true)
+    }
+
+    // Импорт НЕ зависит от текущего языка приложения.
+    // ImportPreviewModal сам распознаёт украинский, английский и
+    // немецкий CSV, показывает предпросмотр и вызывает этот колбэк
+    // только с уже проверенными строками.
+    const handleImportConfirmed = async (
+        importedApplications: ImportApplication[],
+    ) => {
+        for (const application of importedApplications) {
+            await createApplication(application)
+        }
+
+        setPage(1)
     }
 
     return (
@@ -263,11 +217,7 @@ function App() {
                         <button
                             className={styles.exportButton}
                             onClick={handleExportPDF}
-                            disabled={
-                                applications.length === 0 ||
-                                isLoading ||
-                                isImporting
-                            }
+                            disabled={applications.length === 0 || isLoading}
                             type="button"
                         >
                             <span>↓</span>
@@ -277,11 +227,7 @@ function App() {
                         <button
                             className={styles.exportButton}
                             onClick={handleExportCSV}
-                            disabled={
-                                applications.length === 0 ||
-                                isLoading ||
-                                isImporting
-                            }
+                            disabled={applications.length === 0 || isLoading}
                             type="button"
                         >
                             <span>↓</span>
@@ -291,34 +237,16 @@ function App() {
                         <button
                             className={styles.exportButton}
                             onClick={handleImportButtonClick}
-                            disabled={
-                                isLoading ||
-                                isImporting
-                            }
+                            disabled={isLoading}
                             type="button"
                         >
                             <span>↑</span>
-
-                            {isImporting
-                                ? t(
-                                    'actions.importingCsv',
-                                    'Importing...',
-                                )
-                                : t('actions.importCsv')}
+                            {t('actions.importCsv')}
                         </button>
-
-                        <input
-                            ref={fileInputRef}
-                            type="file"
-                            accept=".csv,text/csv"
-                            onChange={handleImportCSV}
-                            hidden
-                        />
 
                         <button
                             className={styles.createButton}
                             onClick={handleOpenCreateModal}
-                            disabled={isImporting}
                             type="button"
                         >
                             <span>+</span>
@@ -355,7 +283,7 @@ function App() {
 
                 <ApplicationsTable
                     applications={applications}
-                    isLoading={isLoading || isImporting}
+                    isLoading={isLoading}
                     loadError={loadError}
                     hasActiveFilters={hasActiveFilters}
                     onEdit={handleOpenEditModal}
@@ -379,6 +307,12 @@ function App() {
                 error={formError}
                 onClose={handleCloseModal}
                 onSubmit={handleFormSubmit}
+            />
+
+            <ImportPreviewModal
+                isOpen={isImportModalOpen}
+                onClose={() => setIsImportModalOpen(false)}
+                onImport={handleImportConfirmed}
             />
         </main>
     )
