@@ -1,43 +1,36 @@
 import {useMemo, useState} from 'react'
+import {useTranslation} from 'react-i18next'
 import {
     parseApplicationsCSV,
     commitParsedRows,
-} from '../../utils/importApplicationsFromCsv.ts'
-import type {ImportApplication, ParseResult} from '../../utils/importApplicationsFromCsv.ts'
+} from '@/utils/importApplicationsFromCsv.ts'
+import type {ImportApplication, ParseResult} from '@/utils/importApplicationsFromCsv.ts'
+import styles from './ImportPreviewModal.module.scss'
 
 type Props = {
     isOpen: boolean
     onClose: () => void
-    /** Вызывается по нажатию "Импортировать" с готовым списком заявок. */
     onImport: (applications: ImportApplication[]) => Promise<void>
 }
 
-const overlayStyle: React.CSSProperties = {
-    position: 'fixed',
-    inset: 0,
-    background: 'rgba(0, 0, 0, 0.5)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    zIndex: 1000,
-}
-
-const panelStyle: React.CSSProperties = {
-    background: 'var(--modal-bg, #fff)',
-    color: 'var(--modal-fg, #111)',
-    borderRadius: 8,
-    padding: 24,
-    maxWidth: 720,
-    width: '90%',
-    maxHeight: '85vh',
-    overflowY: 'auto',
+const FIELD_LABEL_KEYS: Record<string, string> = {
+    company_name: 'table.company',
+    description: 'table.position',
+    url: 'table.jobUrl',
+    notes: 'table.notes',
+    applied_at: 'table.appliedAt',
+    status: 'table.status',
 }
 
 export const ImportPreviewModal = ({isOpen, onClose, onImport}: Props) => {
+    const {t} = useTranslation()
     const [result, setResult] = useState<ParseResult | null>(null)
     const [excluded, setExcluded] = useState<Set<number>>(new Set())
     const [isImporting, setIsImporting] = useState(false)
     const [importError, setImportError] = useState<string | null>(null)
+
+    const fieldLabel = (field: string) =>
+        FIELD_LABEL_KEYS[field] ? t(FIELD_LABEL_KEYS[field]) : field
 
     const handleFileSelected = async (file: File) => {
         setImportError(null)
@@ -92,133 +85,177 @@ export const ImportPreviewModal = ({isOpen, onClose, onImport}: Props) => {
             setImportError(
                 error instanceof Error
                     ? error.message
-                    : 'Fehler beim Importieren der CSV-Datei.',
+                    : t('errors.csvImport'),
             )
         } finally {
             setIsImporting(false)
         }
     }
 
+    const hasMissingColumns = !!result && result.missingRequiredColumns.length > 0
+    const isPreviewReady = !!result && result.missingRequiredColumns.length === 0
+    const validCount = result ? result.rows.filter((r) => r.errors.length === 0).length : 0
+    const errorCount = result ? result.rows.filter((r) => r.errors.length > 0).length : 0
+
     return (
-        <div style={overlayStyle} onClick={handleCloseModal}>
-            <div style={panelStyle} onClick={(e) => e.stopPropagation()}>
-                <h2>CSV importieren</h2>
+        <div className={styles.overlay} onClick={handleCloseModal}>
+            <div
+                className={styles.panel}
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="import-modal-title"
+                onClick={(e) => e.stopPropagation()}
+            >
+                <div className={styles.header}>
+                    <h2 id="import-modal-title" className={styles.title}>
+                        {t('actions.importCsv')}
+                    </h2>
+                    <button
+                        className={styles.closeButton}
+                        onClick={handleCloseModal}
+                        disabled={isImporting}
+                        aria-label={t('actions.close')}
+                    >
+                        ×
+                    </button>
+                </div>
 
-                {!result && (
-                    <input
-                        type="file"
-                        accept=".csv,text/csv"
-                        onChange={(e) => {
-                            const file = e.target.files?.[0]
-                            if (file) handleFileSelected(file)
-                        }}
-                    />
-                )}
+                <div className={styles.body}>
+                    {!result && (
+                        <label className={styles.dropzone}>
+                            <span className={styles.dropzoneTitle}>{t('importModal.dropzoneTitle')}</span>
+                            <span className={styles.dropzoneHint}>
+                                {t('importModal.dropzoneHint')}
+                            </span>
+                            <input
+                                className={styles.fileInput}
+                                type="file"
+                                accept=".csv,text/csv"
+                                onChange={(e) => {
+                                    const file = e.target.files?.[0]
+                                    if (file) handleFileSelected(file)
+                                }}
+                            />
+                        </label>
+                    )}
 
-                {result && result.missingRequiredColumns.length > 0 && (
-                    <div>
-                        <p>Не удалось распознать обязательные колонки:</p>
-                        <ul>
-                            {result.missingRequiredColumns.map((field) => (
-                                <li key={field}>{field}</li>
-                            ))}
-                        </ul>
-                        <button onClick={handleReset}>Выбрать другой файл</button>
-                    </div>
-                )}
-
-                {result && result.missingRequiredColumns.length === 0 && (
-                    <>
-                        <h3>Найденные колонки</h3>
-                        <ul>
-                            {Object.entries(result.columnMapping).map(([field, header]) => (
-                                <li key={field}>
-                                    {field} → "{header}"
-                                </li>
-                            ))}
-                        </ul>
-
-                        <p>
-                            Валидных строк:{' '}
-                            {result.rows.filter((r) => r.errors.length === 0).length}, с
-                            ошибками:{' '}
-                            {result.rows.filter((r) => r.errors.length > 0).length}, будет
-                            импортировано: {includedRowNumbers.size}
-                        </p>
-
-                        <table style={{width: '100%', borderCollapse: 'collapse'}}>
-                            <thead>
-                                <tr>
-                                    <th></th>
-                                    <th>#</th>
-                                    <th>Company</th>
-                                    <th>Status</th>
-                                    <th>Date</th>
-                                    <th>Ошибки</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {result.rows.map((row) => {
-                                    const hasErrors = row.errors.length > 0
-                                    return (
-                                        <tr
-                                            key={row.rowNumber}
-                                            style={hasErrors ? {opacity: 0.5} : undefined}
-                                        >
-                                            <td>
-                                                <input
-                                                    type="checkbox"
-                                                    disabled={hasErrors}
-                                                    checked={
-                                                        !hasErrors &&
-                                                        includedRowNumbers.has(row.rowNumber)
-                                                    }
-                                                    onChange={() => toggleRow(row.rowNumber)}
-                                                />
-                                            </td>
-                                            <td>{row.rowNumber}</td>
-                                            <td>{row.data.company_name ?? '—'}</td>
-                                            <td>{row.data.status ?? '—'}</td>
-                                            <td>{row.data.applied_at ?? '—'}</td>
-                                            <td style={{color: 'crimson'}}>
-                                                {row.errors.join(' ')}
-                                            </td>
-                                        </tr>
-                                    )
-                                })}
-                            </tbody>
-                        </table>
-
-                        {importError && (
-                            <p role="alert" style={{color: 'crimson'}}>
-                                {importError}
-                            </p>
-                        )}
-
-                        <div style={{marginTop: 16, display: 'flex', gap: 8}}>
-                            <button onClick={handleReset} disabled={isImporting}>
-                                Другой файл
-                            </button>
-                            <button
-                                onClick={handleConfirm}
-                                disabled={includedRowNumbers.size === 0 || isImporting}
-                            >
-                                {isImporting
-                                    ? 'Импорт...'
-                                    : `Импортировать (${includedRowNumbers.size})`}
+                    {hasMissingColumns && result && (
+                        <div className={styles.errorBox}>
+                            <p>{t('importModal.missingColumns')}</p>
+                            <ul>
+                                {result.missingRequiredColumns.map((field) => (
+                                    <li key={field}>{fieldLabel(field)}</li>
+                                ))}
+                            </ul>
+                            <button className={styles.secondaryButton} onClick={handleReset}>
+                                {t('importModal.chooseAnotherFile')}
                             </button>
                         </div>
-                    </>
-                )}
+                    )}
 
-                <button
-                    onClick={handleCloseModal}
-                    style={{position: 'absolute', top: 16, right: 16}}
-                    disabled={isImporting}
-                    aria-label="Close"
-                >
-                    ×
-                </button>
+                    {isPreviewReady && result && (
+                        <>
+                            <h3 className={styles.sectionTitle}>{t('importModal.foundColumns')}</h3>
+                            <ul className={styles.mappingList}>
+                                {Object.entries(result.columnMapping).map(([field, header]) => (
+                                    <li key={field} className={styles.mappingItem}>
+                                        <span className={styles.mappingField}>{fieldLabel(field)}</span>
+                                        <span className={styles.mappingHeader}>→ "{header}"</span>
+                                    </li>
+                                ))}
+                            </ul>
+
+                            <p className={styles.summary}>
+                                <span>
+                                    {t('importModal.validRows')}: <strong>{validCount}</strong>
+                                </span>
+                                <span className={errorCount > 0 ? styles.summaryError : undefined}>
+                                    {t('importModal.rowsWithErrors')}: <strong>{errorCount}</strong>
+                                </span>
+                                <span>
+                                    {t('importModal.willImport')}: <strong>{includedRowNumbers.size}</strong>
+                                </span>
+                            </p>
+
+                            <div className={styles.tableWrap}>
+                                <table className={styles.table}>
+                                    <thead>
+                                    <tr>
+                                        <th className={styles.colCheck}></th>
+                                        <th className={styles.colNumber}>#</th>
+                                        <th>{t('table.company')}</th>
+                                        <th>{t('table.status')}</th>
+                                        <th>{t('table.appliedAt')}</th>
+                                        <th>{t('importModal.errors')}</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {result.rows.map((row) => {
+                                        const hasErrors = row.errors.length > 0
+                                        return (
+                                            <tr
+                                                key={row.rowNumber}
+                                                className={hasErrors ? styles.rowInvalid : undefined}
+                                            >
+                                                <td>
+                                                    <input
+                                                        className={styles.checkbox}
+                                                        type="checkbox"
+                                                        disabled={hasErrors}
+                                                        checked={
+                                                            !hasErrors &&
+                                                            includedRowNumbers.has(row.rowNumber)
+                                                        }
+                                                        onChange={() => toggleRow(row.rowNumber)}
+                                                    />
+                                                </td>
+                                                <td className={styles.colNumber}>{row.rowNumber}</td>
+                                                <td>{row.data.company_name ?? '—'}</td>
+                                                <td>
+                                                    {row.data.status
+                                                        ? t(`status.${row.data.status}`, {defaultValue: row.data.status})
+                                                        : '—'}
+                                                </td>
+                                                <td>{row.data.applied_at ?? '—'}</td>
+                                                <td className={styles.cellError}>
+                                                    {row.errors.join(' ')}
+                                                </td>
+                                            </tr>
+                                        )
+                                    })}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            {importError && (
+                                <p role="alert" className={styles.importError}>
+                                    {importError}
+                                </p>
+                            )}
+                        </>
+                    )}
+                </div>
+
+                {isPreviewReady && (
+                    <div className={styles.footer}>
+                        <button
+                            className={styles.secondaryButton}
+                            onClick={handleReset}
+                            disabled={isImporting}
+                        >
+                            {t('importModal.anotherFile')}
+                        </button>
+                        <button
+                            className={styles.primaryButton}
+                            onClick={handleConfirm}
+                            disabled={includedRowNumbers.size === 0 || isImporting}
+                        >
+                            {isImporting
+                                ? t('actions.importingCsv')
+                                : t('importModal.import', {count: includedRowNumbers.size})}
+                        </button>
+                    </div>
+                )}
             </div>
         </div>
     )

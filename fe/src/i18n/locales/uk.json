@@ -102,5 +102,24 @@
   },
   "errors": {
         "csvImport": "Помилка імпортування файлу CSV."
-    }
+    },
+  "importModal": {
+    "dropzoneTitle": "Оберіть CSV-файл",
+    "dropzoneHint": "Підтримується формат .csv",
+    "missingColumns": "Не вдалося розпізнати обов’язкові колонки:",
+    "chooseAnotherFile": "Обрати інший файл",
+    "foundColumns": "Знайдені колонки",
+    "validRows": "Коректних рядків",
+    "rowsWithErrors": "З помилками",
+    "willImport": "Буде імпортовано",
+    "errors": "Помилки",
+    "anotherFile": "Інший файл",
+    "import": "Імпортувати ({{count}})"
+  },
+  "rowErrors": {
+    "companyEmpty": "Не вказано компанію.",
+    "statusEmpty": "Не вказано статус.",
+    "statusUnknown": "Невідомий статус «{{value}}».",
+    "dateInvalid": "Некоректна дата «{{value}}». Очікується ДД.ММ.РРРР."
+  }
 }

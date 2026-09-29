@@ -156,10 +156,26 @@ const tryParseDate = (value: string): string | null => {
     return null
 }
 
+/**
+ * Ошибки строки — это коды, а не готовые тексты: перевод делает UI
+ * по ключу importModal.rowErrors.<code>.
+ */
+type RowErrorCode =
+    | 'companyEmpty'
+    | 'statusEmpty'
+    | 'statusUnknown'
+    | 'dateInvalid'
+
+type RowError = {
+    code: RowErrorCode
+    /** Значение из CSV для подстановки в текст ошибки. */
+    value?: string
+}
+
 type ParsedRow = {
     rowNumber: number
     data: Partial<ImportApplication>
-    errors: string[]
+    errors: RowError[]
 }
 
 type ParseResult = {
@@ -213,23 +229,23 @@ export const parseApplicationsCSV = async (
 
     const parsedRows: ParsedRow[] = rows.slice(1).map((row, index) => {
         const rowNumber = index + 2
-        const errors: string[] = []
+        const errors: RowError[] = []
         const data: Partial<ImportApplication> = {}
 
         const companyName = getValue(row, 'company_name')
         if (!companyName) {
-            errors.push('Company is empty.')
+            errors.push({code: 'companyEmpty'})
         } else {
             data.company_name = companyName
         }
 
         const statusRaw = getValue(row, 'status')
         if (!statusRaw) {
-            errors.push('Status is empty.')
+            errors.push({code: 'statusEmpty'})
         } else {
             const status = tryParseStatus(statusRaw)
             if (status === null) {
-                errors.push(`Unknown status "${statusRaw}".`)
+                errors.push({code: 'statusUnknown', value: statusRaw})
             } else {
                 data.status = status
             }
@@ -238,7 +254,7 @@ export const parseApplicationsCSV = async (
         const dateRaw = getValue(row, 'applied_at')
         const date = tryParseDate(dateRaw)
         if (date === null) {
-            errors.push(`Invalid date "${dateRaw}". Expected DD.MM.YYYY.`)
+            errors.push({code: 'dateInvalid', value: dateRaw})
         } else {
             data.applied_at = date
         }
@@ -267,4 +283,12 @@ export const commitParsedRows = (
         .map((row) => row.data as ImportApplication)
 }
 
-export type {ImportApplication, ParseResult, ParsedRow, CsvField, ApplicationStatus}
+export type {
+    ImportApplication,
+    ParseResult,
+    ParsedRow,
+    RowError,
+    RowErrorCode,
+    CsvField,
+    ApplicationStatus,
+}

@@ -102,5 +102,24 @@
   },
   "errors": {
         "csvImport": "Fehler beim Importieren der CSV-Datei."
-    }
+    },
+  "importModal": {
+    "dropzoneTitle": "CSV-Datei auswählen",
+    "dropzoneHint": "Es werden nur .csv-Dateien unterstützt",
+    "missingColumns": "Die erforderlichen Spalten wurden nicht erkannt:",
+    "chooseAnotherFile": "Andere Datei wählen",
+    "foundColumns": "Erkannte Spalten",
+    "validRows": "Gültige Zeilen",
+    "rowsWithErrors": "Mit Fehlern",
+    "willImport": "Wird importiert",
+    "errors": "Fehler",
+    "anotherFile": "Andere Datei",
+    "import": "Importieren ({{count}})"
+  },
+  "rowErrors": {
+    "companyEmpty": "Unternehmen fehlt.",
+    "statusEmpty": "Status fehlt.",
+    "statusUnknown": "Unbekannter Status „{{value}}“.",
+    "dateInvalid": "Ungültiges Datum „{{value}}“. Erwartet: TT.MM.JJJJ."
+  }
 }

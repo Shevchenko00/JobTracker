@@ -102,5 +102,24 @@
   },
   "errors": {
         "csvImport": "Error importing CSV file."
-    }
+    },
+  "importModal": {
+    "dropzoneTitle": "Choose a CSV file",
+    "dropzoneHint": "Only .csv files are supported",
+    "missingColumns": "Could not find the required columns:",
+    "chooseAnotherFile": "Choose another file",
+    "foundColumns": "Detected columns",
+    "validRows": "Valid rows",
+    "rowsWithErrors": "With errors",
+    "willImport": "To be imported",
+    "errors": "Errors",
+    "anotherFile": "Another file",
+    "import": "Import ({{count}})"
+  },
+  "rowErrors": {
+    "companyEmpty": "Company is empty.",
+    "statusEmpty": "Status is empty.",
+    "statusUnknown": "Unknown status \"{{value}}\".",
+    "dateInvalid": "Invalid date \"{{value}}\". Expected DD.MM.YYYY."
+  }
 }
